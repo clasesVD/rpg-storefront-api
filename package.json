@@ -1,0 +1,23 @@
+{
+  "name": "rpg-storefront-api",
+  "version": "0.0.1",
+  "description": "rpg storefront api",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clasesVD/rpg-storefront-api.git"
+  },
+  "author": "clasesVD",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clasesVD/rpg-storefront-api/issues"
+  },
+  "homepage": "https://github.com/clasesVD/rpg-storefront-api#readme",
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "typescript": "^5.7.3"
+  }
+}

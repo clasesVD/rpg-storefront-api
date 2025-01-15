@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // Modern JavaScript
+    "module": "commonjs", // Node.js compatibility
+    "strict": false, // Disables all strict type checking options
+    "noImplicitAny": false, // Allows variables to implicitly have an 'any' type
+    "strictNullChecks": false, // Allows 'null' and 'undefined' to be assignable to other types
+    "strictFunctionTypes": false, // Disables strict checking of function type signatures
+    "strictBindCallApply": false, // Disables strict checking of the bind, call, and apply methods
+    "noImplicitThis": false, // Allows 'this' to have an implicit 'any' type
+    "alwaysStrict": false, // Disables strict mode in emitted JavaScript
+    "skipLibCheck": true, // Skips type checking of declaration files
+    "esModuleInterop": true, // Enables interoperability with CommonJS modules
+    "forceConsistentCasingInFileNames": true, // Enforces consistent casing in file names
+    "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./src" // Root directory for source files
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
