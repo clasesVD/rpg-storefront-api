@@ -1,0 +1,26 @@
+import fp from 'fastify-plugin'
+import fastifyEnv from '@fastify/env'
+import { Type as T, Static } from '@sinclair/typebox'
+
+export const configSchema = T.Object({
+  PORT: T.Number({ default: 3000 })
+})
+
+export type Config = Static<typeof configSchema>
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    config: Config
+  }
+}
+
+export default fp((fastify, options, done) => {
+  fastify.register(fastifyEnv, {
+    dotenv: true,
+    confKey: 'config',
+    schema: configSchema,
+    ...options
+  })
+
+  done()
+})
