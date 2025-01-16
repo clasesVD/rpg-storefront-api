@@ -1,11 +1,9 @@
-import { Type as T, Static } from '@sinclair/typebox'
+import { Type as T } from '@sinclair/typebox'
 
-export const rootSchema = T.Object({
-  response: T.Object({
+export const rootSchema = {
+  response: {
     200: T.Object({
       pong: T.String()
     })
-  })
-})
-
-export type RootRoute = Static<typeof rootSchema>
+  }
+}
