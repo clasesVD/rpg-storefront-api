@@ -1,5 +1,6 @@
 import fp from 'fastify-plugin'
 import { rootSchema } from '../schemas/root.schema'
+import userRouter from './user.router'
 
 export default fp((fastify, _, done) => {
   fastify.route({
@@ -9,6 +10,10 @@ export default fp((fastify, _, done) => {
     handler: (request, reply) => {
       return { pong: 'Hello World!' }
     }
+  })
+
+  fastify.register(userRouter, {
+    prefix: '/users'
   })
 
   done()
