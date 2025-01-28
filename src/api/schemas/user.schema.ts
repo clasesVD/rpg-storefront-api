@@ -2,10 +2,11 @@ import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyReply } from 'fastify'
 
 export const userSchema = T.Object({
-  id: T.Number(),
-  name: T.String(),
-  age: T.Number(),
-  email: T.String()
+    id: T.Number(),
+    name: T.String(),
+    email: T.String({ format:'email' }),
+    password: T.String(),
+    balance: T.String()
 })
 
 export const userGetAllResponseSchema = {
