@@ -1,5 +1,5 @@
 import UserController from '../controllers/user.controller'
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { userGetAllResponseSchema } from '../schemas/user.schema'
 
 export default async (fastify: FastifyInstance) => {
@@ -8,6 +8,6 @@ export default async (fastify: FastifyInstance) => {
     url: '/',
     method: 'GET',
     schema: userGetAllResponseSchema,
-    handler: userController.get.bind(userController),
+    handler: userController.get.bind(userController)
   })
 }

@@ -1,5 +1,5 @@
 import fp from 'fastify-plugin'
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle } from 'drizzle-orm/node-postgres'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -8,7 +8,7 @@ declare module 'fastify' {
 }
 
 export default fp((fastify, options, done) => {
-  const db = drizzle(fastify.config.DATABASE_URL);
+  const db = drizzle(fastify.config.DATABASE_URL)
   fastify.decorate('db', db)
 
   done()
