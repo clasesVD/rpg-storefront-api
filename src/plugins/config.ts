@@ -6,7 +6,7 @@ export const configSchema = T.Object({
   HOST: T.String({ default: 'http://localhost' }),
   PORT: T.Number({ default: 3000 }),
   DATABASE_URL: T.String(),
-  NODE_ENV: T.String({ default: 'development' })
+  JWT_SECRET: T.String()
 })
 
 export type Config = Static<typeof configSchema>

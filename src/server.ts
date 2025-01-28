@@ -1,5 +1,4 @@
 import Fastify, { type FastifyInstance, type RouteShorthandOptions } from 'fastify'
-import type { Server, IncomingMessage, ServerResponse } from 'http'
 import autoload from '@fastify/autoload'
 import path from 'node:path'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
