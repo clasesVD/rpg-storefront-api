@@ -4,7 +4,7 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -35,7 +35,9 @@ export default [
       "@typescript-eslint/explicit-function-return-type": ["warn"],
       "@typescript-eslint/consistent-type-imports": "error",
       "no-undef": "off",
-      "no-unused-vars": "off"
+      "no-unused-vars": "off",
+      "no-duplicate-imports": "error",
+      "eqeqeq": "error"
     }
   }
 ]
