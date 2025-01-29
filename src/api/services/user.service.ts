@@ -1,16 +1,16 @@
-import { FastifyInstance } from 'fastify';
-import { usersTable } from '../../db/schema';
+import type { FastifyInstance } from 'fastify'
+import { usersTable } from '../../db/schema'
 
 class UserService {
-    fastify: FastifyInstance
+  fastify: FastifyInstance
 
-    constructor(fastify: FastifyInstance){
-        this.fastify = fastify;
-    }
+  constructor (fastify: FastifyInstance){
+    this.fastify = fastify
+  }
 
-    async get(){
-        return this.fastify.db.select().from(usersTable).execute()
-    }
+  async get (){
+    return this.fastify.db.select().from(usersTable).execute()
+  }
 }
 
 export default UserService

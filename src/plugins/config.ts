@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin'
 import fastifyEnv from '@fastify/env'
-import { Type as T, Static } from '@sinclair/typebox'
+import  { Type as T, type Static } from '@sinclair/typebox'
 
 export const configSchema = T.Object({
   PORT: T.Number({ default: 3000 }),

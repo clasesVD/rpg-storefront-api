@@ -2,7 +2,7 @@ import Fastify, { type FastifyInstance, type RouteShorthandOptions } from 'fasti
 import type { Server, IncomingMessage, ServerResponse } from 'http'
 import autoload from '@fastify/autoload'
 import path from 'node:path'
-import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
+import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import router from './api/router'
 
 const server: FastifyInstance = Fastify({}).withTypeProvider<TypeBoxTypeProvider>()
