@@ -11,6 +11,14 @@ class CategoryService {
   async get() {
     return this.fastify.db.select().from(categoriesTable).execute();
   }
+
+  async post(name: string) {
+    return this.fastify.db
+      .insert(categoriesTable)
+      .values({ name })
+      .returning()
+      .execute();
+  }
 }
 
 export default CategoryService;
