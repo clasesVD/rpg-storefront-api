@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch 'src/**' --exec 'npm run build && npm start'",
+    "dev": "nodemon -L --watch '**/src/**' --exec 'npm run build && npm start'",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
