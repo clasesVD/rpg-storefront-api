@@ -10,9 +10,14 @@
 
 ## Description
 
-RPG STOREFRONT API is an API that allows you idk because idk what it does honestly.
+Description
+RPG STOREFRONT API is a Fastify-based API designed to manage RPG storefront operations.
 
-- Fastify
+Key Technologies:
+
+- Fastify (Lightweight and high-performance backend framework)
+- Drizzle ORM (Modern database ORM)
+- PostgreSQL (Relational database)
 
 ## Installation
 
@@ -29,24 +34,53 @@ npm install
 ```
 
 3. Create or modify `.env` file
+``` bash
+PORT=`PORT NUMBER` // Default is `3000`, but you can modify it to suit your needs.
+DATABASE_URL=postgres://username:password@hostname:port/database_name // For more details, refer to the [documentation](https://www.postgresql.org/docs/current/libpq-connect.html)
+```
 
-4. Run the server!
+4. Start the database with Docker
+If you're using Docker for the database, run:
+
+``` bash
+docker-compose up -d
+```
+
+This will start the PostgreSQL container in the background.
+
+5. Run database migrations (Drizzle ORM)
+If this is your first time setting up the project, generate and apply migrations:
+
+``` bash
+npm run migrate:generate
+npm run migrate:apply
+```
+
+Or if migrations already exist:
+
+``` bash
+npm run migrate:apply
+```
+
+6. Run the server!
 ``` bash
 npm run dev
 ```
 
 ## Usage
 
-You can now make request to the API. Here is an example of how to get a list of users:
+Once the server is running, you can make requests to the API.
+
+Example request to retrieve a list of users:
 
 ``` bash
-"https://localhost:3000/users"
+curl -X GET http://localhost:3000/users
 ```
 
-Example request using `curl`:
+Or open this URL in your browser:
 
 ``` bash
-curl -X GET https://localhost:3000/users
+http://localhost:3000/users
 ```
 
 ## EndPoints
@@ -54,15 +88,19 @@ curl -X GET https://localhost:3000/users
 GET /users
 - Retrieves a list of users.
 
-Response (200):
+Response (200 OK):
 ``` bash
 [
   {
-    "id": undefined,
+    "id": 1,
     "name": "John Doe",
     "email": "john.doe@example.com"
   },
-  ...
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com"
+  }
 ]
 ```
 
@@ -73,7 +111,7 @@ Response (200):
 - JWT Authentication: Once implemented, you'll need to include and Authorization header with the token:
 
 ``` bash
-curl -X GET https://localhost:3000/users -H "Authorization: Bearer <your_token>"
+curl -X GET https://localhost:3000/users -H "Authorization: Bearer <your_token>" // For more details, refer to the [documentation](https://jwt.io/introduction)
 ```
 
 ## License
