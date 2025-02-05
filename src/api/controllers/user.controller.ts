@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import UserService from '../services/user.service'
+import type { UserCreateRequest, UserCreateResponse } from '../schemas/user.schema'
 
 class UserController {
   userService: UserService
@@ -8,8 +9,13 @@ class UserController {
     this.userService = new UserService(fastify)
   }
 
-  async get (){
-    return this.userService.get()
+  async getAll (){
+    return this.userService.getAll()
+  }
+
+  async create (req: UserCreateRequest, res: UserCreateResponse){
+    const result = await this.userService.create(req.body)
+    return result[0]
   }
 }
 

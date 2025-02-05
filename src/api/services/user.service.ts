@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import { usersTable } from '../../db/schema'
+import usersTable from '../../db/schema'
+import type { UserDraft } from '../schemas/user.schema'
 
 class UserService {
   fastify: FastifyInstance
@@ -8,8 +9,12 @@ class UserService {
     this.fastify = fastify
   }
 
-  async get (){
+  async getAll (){
     return this.fastify.db.select().from(usersTable).execute()
+  }
+
+  async create (userDraft: UserDraft){
+    return this.fastify.db.insert(usersTable).values(userDraft).returning()
   }
 }
 
