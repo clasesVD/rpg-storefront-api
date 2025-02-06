@@ -4,8 +4,11 @@ import autoload from '@fastify/autoload'
 import path from 'node:path'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import router from './api/router'
+import loggerConfig from './config/logger'
 
-const server: FastifyInstance = Fastify({}).withTypeProvider<TypeBoxTypeProvider>()
+const server: FastifyInstance = Fastify({
+  logger: loggerConfig
+}).withTypeProvider<TypeBoxTypeProvider>()
 
 server.register(autoload, {
   dir: path.join(__dirname, 'plugins')
