@@ -4,10 +4,13 @@ import autoload from '@fastify/autoload'
 import path from 'node:path'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import router from './api/router'
-import loggerConfig from './config/logger'
+import loggerConfig from './logger'
 
 const server: FastifyInstance = Fastify({
-  logger: loggerConfig
+  logger: loggerConfig,
+  genReqId () {
+    return undefined
+  }
 }).withTypeProvider<TypeBoxTypeProvider>()
 
 server.register(autoload, {
@@ -25,7 +28,7 @@ const start = async () => {
     const port = typeof address === 'string' ? address : address?.port
 
   } catch (err) {
-    console.error(err)
+    server.log.error(err)
     process.exit(1)
   }
 }
