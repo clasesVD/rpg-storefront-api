@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import UserService from '../services/user.service'
-import type { UserCreateRequest, UserCreateResponse, UserGetByIdRequest, UserGetByIdResponse } from '../schemas/user.schema'
+import type { UserCreateRequest, UserCreateResponse, UserGetByIdRequest, UserGetByIdResponse, UserPatchByIdRequest, UserPatchByIdResponse } from '../schemas/user.schema'
 
 class UserController {
   userService: UserService
@@ -20,6 +20,10 @@ class UserController {
 
   async getById (req: UserGetByIdRequest, res: UserGetByIdResponse){
     return this.userService.getById(req.params.id)
+  }
+
+  async patchById (req: UserPatchByIdRequest, res: UserPatchByIdResponse){
+    return this.userService.patchById(req.params.id, req.body)
   }
 }
 
