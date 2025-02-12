@@ -51,6 +51,20 @@ export const categoryUpdateSchema = {
   }
 }
 
+export const categoryDeleteSchema = {
+  tags: ['Category'],
+  params: T.Object({
+    id: categoryParamsSchema
+  }),
+  request: {
+    body: categoryDraftSchema
+  },
+  body: categoryDraftSchema,
+  response: {
+    201: categorySchema
+  }
+}
+
 export type Category = Static<typeof categorySchema>;
 export type CategoryDraft = Static<typeof categoryDraftSchema>;
 export type CategoryGetAll = FastifyReply<{ Body: Category[] }>;
@@ -60,3 +74,4 @@ export type CategoryUpdateRequest = FastifyRequest<{
   Params: { id: string };
   Body: CategoryDraft;
 }>;
+export type CategoryDeleteSchema = FastifyRequest<{ Params: { id: string } }>;

@@ -38,6 +38,14 @@ class CategoryService {
       .returning()
       .execute()
   }
+
+  async delete (id: string) {
+    return this.fastify.db
+      .delete(categoriesTable)
+      .where(eq(categoriesTable.id, id))
+      .returning()
+      .execute()
+  }
 }
 
 export default CategoryService

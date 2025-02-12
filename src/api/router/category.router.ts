@@ -4,7 +4,8 @@ import {
   categoryGetAllSchema,
   categoryCreateSchema,
   categoryGetByIdSchema,
-  categoryUpdateSchema
+  categoryUpdateSchema,
+  categoryDeleteSchema
 } from '../schemas/category.schema'
 
 export default async (fastify: FastifyInstance) => {
@@ -36,5 +37,12 @@ export default async (fastify: FastifyInstance) => {
     method: 'PATCH',
     schema: categoryUpdateSchema,
     handler: categoryController.patch.bind(categoryController)
+  })
+
+  fastify.route({
+    url: '/:id',
+    method: 'DELETE',
+    schema: categoryDeleteSchema,
+    handler: categoryController.delete.bind(categoryController)
   })
 }

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import CategoryService from '../services/category.service'
 import type {
   CategoryCreateRequest,
+  CategoryDeleteSchema,
   CategoryGetByIdRequest,
   CategoryUpdateRequest
 } from '../schemas/category.schema'
@@ -30,6 +31,11 @@ class CategoryController {
     const { id } = req.params
     const { name } = req.body
     return this.categoryService.patch(id, name)
+  }
+
+  async delete (req: CategoryDeleteSchema) {
+    const { id } = req.params
+    return this.categoryService.delete(id)
   }
 }
 
