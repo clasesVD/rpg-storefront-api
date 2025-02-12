@@ -1,6 +1,6 @@
 import UserController from '../controllers/user.controller'
 import type { FastifyInstance } from 'fastify'
-import { userGetAllSchema, userCreateSchema, userGetByIdSchema, userPatchByIdSchema } from '../schemas/user.schema'
+import { userGetAllSchema, userCreateSchema, userGetByIdSchema, userPatchByIdSchema, userDeleteByIdSchema } from '../schemas/user.schema'
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
@@ -30,5 +30,12 @@ export default async (fastify: FastifyInstance) => {
     method: 'PATCH',
     schema: userPatchByIdSchema,
     handler: userController.patchById.bind(userController)
+  })
+
+  fastify.route({
+    url: '/:id',
+    method: 'DELETE',
+    schema: userDeleteByIdSchema,
+    handler: userController.deleteById.bind(userController)
   })
 }

@@ -46,6 +46,15 @@ export const userPatchByIdSchema = {
   }
 }
 
+export const userDeleteByIdSchema = {
+  request: {
+    body: userParamsSchema
+  },
+  response: {
+    200: userPublicSchema
+  }
+}
+
 export type User = Static<typeof userSchema>
 export type UserDraft = Static<typeof userDraftSchema>
 export type UserPublic = Static<typeof userPublicSchema>
@@ -54,7 +63,7 @@ export type UserOptional = Static<typeof userOptionalSchema>
 export type UserGetAll = FastifyReply<{ Body: User[] }>
 export type UserCreateRequest = FastifyRequest<{ Body: UserDraft }>
 export type UserCreateResponse = FastifyReply<{ Body: UserPublic }>
-export type UserGetByIdRequest = FastifyRequest<{ Params: UserParams }>
+export type UserParamsRequest = FastifyRequest<{ Params: UserParams }>
 export type UserGetByIdResponse = FastifyReply<{ Body: UserPublic }>
 export type UserPatchByIdRequest = FastifyRequest<{ Body: UserOptional, Params: UserParams }>
 export type UserPatchByIdResponse = FastifyReply<{ Body: UserPublic }>
