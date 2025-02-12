@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
 import usersTable from '../../db/schema'
-import type { UserDraft, UserOptional } from '../schemas/user.schema'
+import type { UserDraft, UserUpdate } from '../schemas/user.schema'
 
 class UserService {
   fastify: FastifyInstance
@@ -23,13 +23,13 @@ class UserService {
     return result[0]
   }
 
-  async patchById (id: string, payload: UserOptional) {
-    const result = await this.fastify.db.update(usersTable).set(payload).where(eq(usersTable.id, id))
+  async patchById (id: string, payload: UserUpdate) {
+    const result = await this.fastify.db.update(usersTable).set(payload).where(eq(usersTable.id, id)).returning()
     return result[0]
   }
 
   async deleteById (id: string) {
-    const result = await this.fastify.db.delete(usersTable).where(eq(usersTable.id, id))
+    const result = await this.fastify.db.delete(usersTable).where(eq(usersTable.id, id)).returning()
     return result[0]
   }
 }

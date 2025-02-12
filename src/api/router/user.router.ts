@@ -1,6 +1,12 @@
 import UserController from '../controllers/user.controller'
 import type { FastifyInstance } from 'fastify'
-import { userGetAllSchema, userCreateSchema, userGetByIdSchema, userPatchByIdSchema, userDeleteByIdSchema } from '../schemas/user.schema'
+import {
+  userGetAllSchema,
+  userCreateSchema,
+  userGetByIdSchema,
+  userPatchByIdSchema,
+  userDeleteByIdSchema
+} from '../schemas/user.schema'
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
