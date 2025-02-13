@@ -15,7 +15,7 @@ class CategoryController {
   }
 
   async getAll () {
-    return this.categoryService.get()
+    return this.categoryService.getAll()
   }
 
   async getById (req: CategoryGetByIdRequest) {
@@ -24,18 +24,18 @@ class CategoryController {
   }
 
   async create (req: CategoryCreateRequest) {
-    return this.categoryService.post(req.body.name)
+    return this.categoryService.create(req.body.name)
   }
 
   async updateById (req: CategoryUpdateRequest) {
     const { id } = req.params
     const { name } = req.body
-    return this.categoryService.patch(id, name)
+    return this.categoryService.updateById(id, name)
   }
 
   async deleteById (req: CategoryDeleteSchema) {
     const { id } = req.params
-    return this.categoryService.delete(id)
+    return this.categoryService.deleteById(id)
   }
 }
 

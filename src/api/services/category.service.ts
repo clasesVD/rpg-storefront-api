@@ -9,7 +9,7 @@ class CategoryService {
     this.fastify = fastify
   }
 
-  async get () {
+  async getAll () {
     return this.fastify.db.select().from(categoriesTable).execute()
   }
 
@@ -22,7 +22,7 @@ class CategoryService {
     return result[0]
   }
 
-  async post (name: string) {
+  async create (name: string) {
     const result = await this.fastify.db
       .insert(categoriesTable)
       .values({ name })
@@ -31,7 +31,7 @@ class CategoryService {
     return result[0]
   }
 
-  async patch (id: string, name: string) {
+  async updateById (id: string, name: string) {
     const result = await this.fastify.db
       .update(categoriesTable)
       .set({ name })
@@ -41,7 +41,7 @@ class CategoryService {
     return result[0]
   }
 
-  async delete (id: string) {
+  async deleteById (id: string) {
     const result = await this.fastify.db
       .delete(categoriesTable)
       .where(eq(categoriesTable.id, id))
