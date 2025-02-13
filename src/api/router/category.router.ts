@@ -15,14 +15,14 @@ export default async (fastify: FastifyInstance) => {
     url: '/',
     method: 'GET',
     schema: categoryGetAllSchema,
-    handler: categoryController.get.bind(categoryController)
+    handler: categoryController.getAll.bind(categoryController)
   })
 
   fastify.route({
     url: '/',
     method: 'POST',
     schema: categoryCreateSchema,
-    handler: categoryController.post.bind(categoryController)
+    handler: categoryController.create.bind(categoryController)
   })
 
   fastify.route({
@@ -36,13 +36,13 @@ export default async (fastify: FastifyInstance) => {
     url: '/:id',
     method: 'PATCH',
     schema: categoryUpdateSchema,
-    handler: categoryController.patch.bind(categoryController)
+    handler: categoryController.updateById.bind(categoryController)
   })
 
   fastify.route({
     url: '/:id',
     method: 'DELETE',
     schema: categoryDeleteSchema,
-    handler: categoryController.delete.bind(categoryController)
+    handler: categoryController.deleteById.bind(categoryController)
   })
 }

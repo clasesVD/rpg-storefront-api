@@ -23,28 +23,31 @@ class CategoryService {
   }
 
   async post (name: string) {
-    return this.fastify.db
+    const result = await this.fastify.db
       .insert(categoriesTable)
       .values({ name })
       .returning()
       .execute()
+    return result[0]
   }
 
   async patch (id: string, name: string) {
-    return this.fastify.db
+    const result = await this.fastify.db
       .update(categoriesTable)
       .set({ name })
       .where(eq(categoriesTable.id, id))
       .returning()
       .execute()
+    return result[0]
   }
 
   async delete (id: string) {
-    return this.fastify.db
+    const result = await this.fastify.db
       .delete(categoriesTable)
       .where(eq(categoriesTable.id, id))
       .returning()
       .execute()
+    return result[0]
   }
 }
 

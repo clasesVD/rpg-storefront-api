@@ -8,6 +8,7 @@ export const categorySchema = T.Object({
 
 const categoryDraftSchema = T.Omit(categorySchema, ['id'])
 const categoryParamsSchema = T.Pick(categorySchema, ['id'])
+const categoryPatchSchema = T.Partial(categoryDraftSchema)
 
 export const categoryGetAllSchema = {
   tags: ['Category'],
@@ -29,49 +30,38 @@ export const categoryCreateSchema = {
 
 export const categoryGetByIdSchema = {
   tags: ['Category'],
-  params: T.Object({
-    id: categoryParamsSchema
-  }),
   response: {
-    201: categorySchema
+    200: categorySchema
   }
 }
 
 export const categoryUpdateSchema = {
   tags: ['Category'],
-  params: T.Object({
-    id: categoryParamsSchema
-  }),
   request: {
-    body: categoryDraftSchema
+    body: categoryPatchSchema
   },
-  body: categoryDraftSchema,
+  body: categoryPatchSchema,
   response: {
-    201: categorySchema
+    200: categorySchema
   }
 }
 
 export const categoryDeleteSchema = {
   tags: ['Category'],
-  params: T.Object({
-    id: categoryParamsSchema
-  }),
-  request: {
-    body: categoryDraftSchema
-  },
-  body: categoryDraftSchema,
   response: {
-    201: categorySchema
+    200: categorySchema
   }
 }
 
 export type Category = Static<typeof categorySchema>;
 export type CategoryDraft = Static<typeof categoryDraftSchema>;
+export type CategoryParams = Static<typeof categoryParamsSchema>;
+export type CategoryUpdate = Static<typeof categoryPatchSchema>;
 export type CategoryGetAll = FastifyReply<{ Body: Category[] }>;
 export type CategoryCreateRequest = FastifyRequest<{ Body: Category }>;
-export type CategoryGetByIdRequest = FastifyRequest<{ Params: { id: string } }>;
+export type CategoryGetByIdRequest = FastifyRequest<{ Params: CategoryParams }>;
 export type CategoryUpdateRequest = FastifyRequest<{
-  Params: { id: string };
-  Body: CategoryDraft;
+  Params: CategoryParams;
+  Body: CategoryUpdate;
 }>;
-export type CategoryDeleteSchema = FastifyRequest<{ Params: { id: string } }>;
+export type CategoryDeleteSchema = FastifyRequest<{ Params: CategoryParams }>;

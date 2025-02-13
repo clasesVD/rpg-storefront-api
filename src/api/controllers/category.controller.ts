@@ -14,7 +14,7 @@ class CategoryController {
     this.categoryService = new CategoryService(fastify)
   }
 
-  async get () {
+  async getAll () {
     return this.categoryService.get()
   }
 
@@ -23,17 +23,17 @@ class CategoryController {
     return this.categoryService.getById(id)
   }
 
-  async post (req: CategoryCreateRequest) {
+  async create (req: CategoryCreateRequest) {
     return this.categoryService.post(req.body.name)
   }
 
-  async patch (req: CategoryUpdateRequest) {
+  async updateById (req: CategoryUpdateRequest) {
     const { id } = req.params
     const { name } = req.body
     return this.categoryService.patch(id, name)
   }
 
-  async delete (req: CategoryDeleteSchema) {
+  async deleteById (req: CategoryDeleteSchema) {
     const { id } = req.params
     return this.categoryService.delete(id)
   }
