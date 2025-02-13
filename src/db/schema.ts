@@ -1,3 +1,7 @@
 import usersTable from './user.schema'
+import categoriesTable from './category.schema'
 
-export default usersTable
+export {
+  usersTable,
+  categoriesTable
+}
