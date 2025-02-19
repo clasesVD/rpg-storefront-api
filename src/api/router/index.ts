@@ -5,11 +5,11 @@ import categoryRouter from './category.router'
 
 export default fp((fastify, _, done) => {
   fastify.route({
-    url: '/ping',
+    url: '/health',
     method: 'GET',
     schema: rootSchema,
     handler: (request, reply) => {
-      return { pong: 'Hello World!' }
+      return { status: 'healthy' }
     }
   })
 
