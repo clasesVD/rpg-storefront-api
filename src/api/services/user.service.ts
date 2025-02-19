@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
-import usersTable from '../../db/schema'
+import { usersTable } from '../../db/schema'
 import type { UserDraft, UserUpdate } from '../schemas/user.schema'
 
 class UserService {
