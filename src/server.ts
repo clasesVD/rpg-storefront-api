@@ -7,10 +7,7 @@ import router from './api/router'
 import loggerConfig from './logger'
 
 const server: FastifyInstance = Fastify({
-  logger: loggerConfig,
-  genReqId () {
-    return undefined
-  }
+  logger: loggerConfig
 }).withTypeProvider<TypeBoxTypeProvider>()
 
 server.register(autoload, {
