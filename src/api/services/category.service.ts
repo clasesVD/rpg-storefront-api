@@ -5,15 +5,15 @@ import { eq } from 'drizzle-orm'
 class CategoryService {
   fastify: FastifyInstance
 
-  constructor (fastify: FastifyInstance) {
+  constructor(fastify: FastifyInstance) {
     this.fastify = fastify
   }
 
-  async getAll () {
+  async getAll() {
     return this.fastify.db.select().from(categoriesTable).execute()
   }
 
-  async getById (id: string) {
+  async getById(id: string) {
     const result = await this.fastify.db
       .select()
       .from(categoriesTable)
@@ -22,7 +22,7 @@ class CategoryService {
     return result[0]
   }
 
-  async create (name: string) {
+  async create(name: string) {
     const result = await this.fastify.db
       .insert(categoriesTable)
       .values({ name })
@@ -31,7 +31,7 @@ class CategoryService {
     return result[0]
   }
 
-  async updateById (id: string, name: string) {
+  async updateById(id: string, name: string) {
     const result = await this.fastify.db
       .update(categoriesTable)
       .set({ name })
@@ -41,7 +41,7 @@ class CategoryService {
     return result[0]
   }
 
-  async deleteById (id: string) {
+  async deleteById(id: string) {
     const result = await this.fastify.db
       .delete(categoriesTable)
       .where(eq(categoriesTable.id, id))

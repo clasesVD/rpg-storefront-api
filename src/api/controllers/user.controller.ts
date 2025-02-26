@@ -13,28 +13,28 @@ import type {
 class UserController {
   userService: UserService
 
-  constructor (fastify: FastifyInstance){
+  constructor(fastify: FastifyInstance) {
     this.userService = new UserService(fastify)
   }
 
-  async getAll () {
+  async getAll() {
     return this.userService.getAll()
   }
 
-  async create (req: UserCreateRequest, res: UserCreateResponse) {
+  async create(req: UserCreateRequest, res: UserCreateResponse) {
     const result = await this.userService.create(req.body)
     return result[0]
   }
 
-  async getById (req: UserParamsRequest, res: UserGetByIdResponse) {
+  async getById(req: UserParamsRequest, res: UserGetByIdResponse) {
     return this.userService.getById(req.params.id)
   }
 
-  async patchById (req: UserPatchByIdRequest, res: UserPatchByIdResponse) {
+  async patchById(req: UserPatchByIdRequest, res: UserPatchByIdResponse) {
     return this.userService.patchById(req.params.id, req.body)
   }
 
-  async deleteById (req: UserParamsRequest, res: UserDeleteByIdResponse) {
+  async deleteById(req: UserParamsRequest, res: UserDeleteByIdResponse) {
     return this.userService.deleteById(req.id)
   }
 }

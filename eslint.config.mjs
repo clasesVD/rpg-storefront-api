@@ -23,8 +23,16 @@ export default [
       "semi": ["error", "never"],
       "eol-last": ["error", "always"],
       "no-multiple-empty-lines": ["error", { "max": 1 }],
-      "space-before-function-paren": ["error", "always"],
+      "space-before-function-paren": ["error", {
+        named: "never",
+        anonymous: "always",
+        asyncArrow: "always"
+      }],
       "comma-dangle": ["error", "never"],
+      "space-in-parens": ["error", "never"],
+      "keyword-spacing": ["error", { "before": true, "after": true }],
+      "space-before-blocks": ["error", "always"],
+      "object-curly-spacing": ["error", "always"],
       "no-trailing-spaces": "error",
       "no-console": "warn",
       "no-debugger": "error",
