@@ -12,11 +12,9 @@ import type {
 
 class UserController {
   userService: UserService
-  fastify: FastifyInstance
 
   constructor(fastify: FastifyInstance) {
     this.userService = new UserService(fastify)
-    this.fastify = fastify
   }
 
   async getAll() {
