@@ -3,8 +3,10 @@ import fastifyEnv from '@fastify/env'
 import  { Type as T, type Static } from '@sinclair/typebox'
 
 export const configSchema = T.Object({
+  HOST: T.String({ default: 'http://localhost' }),
   PORT: T.Number({ default: 3000 }),
-  DATABASE_URL: T.String()
+  DATABASE_URL: T.String(),
+  NODE_ENV: T.String({ default: 'development' })
 })
 
 export type Config = Static<typeof configSchema>
