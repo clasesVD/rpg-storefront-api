@@ -4,7 +4,7 @@ class BaseError extends Error {
   title: string
   level: string
 
-  constructor (code: number, title: string, message: string, level: string){
+  constructor(code: number, title: string, message: string, level: string) {
     super(message)
     this.type = 'BaseError'
     this.code = code
@@ -12,14 +12,14 @@ class BaseError extends Error {
     this.level = level
   }
 
-  toJSON () {
+  toJSON() {
     return {
       ...this,
       message: this.message
     }
   }
 
-  serialize () {
+  serialize() {
     return JSON.stringify(this.toJSON())
   }
 }

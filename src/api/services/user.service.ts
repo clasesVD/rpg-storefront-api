@@ -13,16 +13,16 @@ class UserService {
     this.fastify = fastify
   }
 
-  async getAll () {
+  async getAll() {
     const result = await this.fastify.db.select().from(usersTable).execute()
     return result
   }
 
-  async create (draft: UserDraft) {
+  async create(draft: UserDraft) {
     try {
       const result = await this.fastify.db.insert(usersTable).values(draft).returning()
       return result
-    }  catch(e) {
+    } catch (e) {
       if (e.message.startsWith('syntax error'))
         throw new BadRequestError('Invalid fields on user creation')
 
@@ -36,12 +36,12 @@ class UserService {
     return result[0]
   }
 
-  async patchById (id: string, payload: UserUpdate) {
+  async patchById(id: string, payload: UserUpdate) {
     await this.getById(id)
     try {
       const result = await this.fastify.db.update(usersTable).set(payload).where(eq(usersTable.id, id)).returning()
       return result[0]
-    } catch(e) {
+    } catch (e) {
       if (e.message.startsWith('syntax error'))
         throw new BadRequestError('Invalid fields on user update')
 
@@ -49,12 +49,12 @@ class UserService {
     }
   }
 
-  async deleteById (id: string) {
+  async deleteById(id: string) {
     await this.getById(id)
     try {
       const result = await this.fastify.db.delete(usersTable).where(eq(usersTable.id, id)).returning()
       return result[0]
-    } catch(e) {
+    } catch (e) {
       throw new InternalServerError(`Failed to delete user with ID:${id}`, e)
     }
   }
