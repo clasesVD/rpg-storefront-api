@@ -14,8 +14,7 @@ class UserService {
   }
 
   async getAll() {
-    const result = await this.fastify.db.select().from(usersTable).execute()
-    return result
+    return this.fastify.db.select().from(usersTable).execute()
   }
 
   async create(draft: UserDraft) {
