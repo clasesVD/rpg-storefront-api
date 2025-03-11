@@ -1,6 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { categoriesTable } from '../../db/schema'
 import { eq } from 'drizzle-orm'
+import BadRequestError from '../errors/BadRequestError'
+import NotFoundError from '../errors/NotFoundError'
+import InternalServerError from '../errors/InternalServerError'
 
 class CategoryService {
   fastify: FastifyInstance
@@ -19,35 +22,56 @@ class CategoryService {
       .from(categoriesTable)
       .where(eq(categoriesTable.id, id))
       .execute()
+    if (!result[0]) throw new NotFoundError(`Category with ID: ${id} does not exist.`)
     return result[0]
   }
 
   async create(name: string) {
-    const result = await this.fastify.db
-      .insert(categoriesTable)
-      .values({ name })
-      .returning()
-      .execute()
-    return result[0]
+    try {
+      const result = await this.fastify.db
+        .insert(categoriesTable)
+        .values({ name })
+        .returning()
+        .execute()
+      return result[0]
+    } catch (e) {
+      if (e.message.startsWith('syntax error'))
+        throw new BadRequestError('Invalid fields on category creation')
+
+      throw new InternalServerError('Failed to create category', e)
+    }
   }
 
   async updateById(id: string, name: string) {
-    const result = await this.fastify.db
-      .update(categoriesTable)
-      .set({ name })
-      .where(eq(categoriesTable.id, id))
-      .returning()
-      .execute()
-    return result[0]
+    await this.getById(id)
+    try {
+      const result = await this.fastify.db
+        .update(categoriesTable)
+        .set({ name })
+        .where(eq(categoriesTable.id, id))
+        .returning()
+        .execute()
+      return result[0]
+    } catch (e) {
+      if (e.message.startsWith('syntax error'))
+        throw new BadRequestError('Invalid fields on category update')
+
+      throw new InternalServerError(`Failed to update category with ID: ${id}`, e)
+    }
   }
 
   async deleteById(id: string) {
-    const result = await this.fastify.db
-      .delete(categoriesTable)
-      .where(eq(categoriesTable.id, id))
-      .returning()
-      .execute()
-    return result[0]
+    await this.getById(id)
+    try {
+      const result = await this.fastify.db
+        .delete(categoriesTable)
+        .where(eq(categoriesTable.id, id))
+        .returning()
+        .execute()
+      return result[0]
+    } catch (e) {
+      throw new InternalServerError(`Failed to delete category with ID:${id}`, e)
+    }
   }
 }
 
