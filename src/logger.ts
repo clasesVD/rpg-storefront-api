@@ -31,7 +31,7 @@ const serializeError = (error: FastifyError) => ({
 
 const loggerConfig = {
   transport: {
-    level: process.env.LOG_LELVEL,
+    level: process.env.LOG_LEVEL,
     target: 'pino-pretty',
     options: {
       colorize: true,

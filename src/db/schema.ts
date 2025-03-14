@@ -1,7 +1,7 @@
-import usersTable from './user.schema'
-import categoriesTable from './category.schema'
+import userTable from './user.schema'
+import categoryTable from './category.schema'
 
 export {
-  usersTable,
-  categoriesTable
+  userTable,
+  categoryTable
 }

@@ -35,14 +35,18 @@ npm install
 3. Create or modify `.env` file
 ```env
 PORT=3000
-DATABASE_URL=postgres://<username>:<password>@<hostname>:<port>/<database_name> # // For more details, refer to the [documentation](https://www.postgresql.org/docs/current/libpq-connect.html)
+DATABASE_URL=postgres://<username>:<password>@<hostname>:<port>/<database_name>
+LOG_LEVEL=debug # Level for the Fastify (Pino) logger. Common values: trace, debug, info, warn, error, fatal.
+NODE_ENV=development # The current environment (development, production, test)
+HOST=http://localhost # The base URL where Swagger is hosted.
 ```
+- For more details on `DATABASE_URL`, refer to the [documentation](https://www.postgresql.org/docs/current/libpq-connect.html)
 
 4. Start the database with Docker
 If you're using Docker for the database, run:
 
 ```bash
-docker-compose up -d
+docker compose up
 ```
 
 This will start the PostgreSQL container in the background.
