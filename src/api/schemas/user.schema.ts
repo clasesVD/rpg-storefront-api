@@ -15,14 +15,14 @@ const userParamsSchema = T.Pick(userSchema, ['id'])
 const userUpdateSchema = T.Partial(userDraftSchema)
 
 export const userGetAllSchema = {
-  tags: ['Users'],
+  tags: ['User'],
   response: {
     200: T.Array(userPublicSchema)
   }
 }
 
 export const userCreateSchema = {
-  tags: ['Users'],
+  tags: ['User'],
   request: {
     body: userDraftSchema
   },
@@ -33,14 +33,14 @@ export const userCreateSchema = {
 }
 
 export const userGetByIdSchema = {
-  tags: ['Users'],
+  tags: ['User'],
   response: {
     200: userPublicSchema
   }
 }
 
 export const userPatchByIdSchema = {
-  tags: ['Users'],
+  tags: ['User'],
   request: {
     body: userUpdateSchema
   },
@@ -51,7 +51,7 @@ export const userPatchByIdSchema = {
 }
 
 export const userDeleteByIdSchema = {
-  tags: ['Users'],
+  tags: ['User'],
   response: {
     200: userPublicSchema
   }

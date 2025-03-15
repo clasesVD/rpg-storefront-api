@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { categoryTable } from '../../db/schema'
+import { categoryTable } from '../../db'
 import { eq } from 'drizzle-orm'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'
