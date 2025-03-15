@@ -53,7 +53,7 @@ This will start the PostgreSQL container in the background.
 
 5. Run database migrations (Drizzle ORM)
 ```bash
-npx drizzle-kit push
+npx drizzle-kit migrate
 ```
 
 6. Run the server!
