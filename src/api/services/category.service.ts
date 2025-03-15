@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { categoriesTable } from '../../db/schema'
+import { categoryTable } from '../../db/schema'
 import { eq } from 'drizzle-orm'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'
@@ -13,14 +13,14 @@ class CategoryService {
   }
 
   async getAll() {
-    return this.fastify.db.select().from(categoriesTable).execute()
+    return this.fastify.db.select().from(categoryTable).execute()
   }
 
   async getById(id: string) {
     const result = await this.fastify.db
       .select()
-      .from(categoriesTable)
-      .where(eq(categoriesTable.id, id))
+      .from(categoryTable)
+      .where(eq(categoryTable.id, id))
       .execute()
     if (!result[0]) throw new NotFoundError(`Category with ID: ${id} does not exist.`)
     return result[0]
@@ -29,7 +29,7 @@ class CategoryService {
   async create(name: string) {
     try {
       const result = await this.fastify.db
-        .insert(categoriesTable)
+        .insert(categoryTable)
         .values({ name })
         .returning()
         .execute()
@@ -46,9 +46,9 @@ class CategoryService {
     await this.getById(id)
     try {
       const result = await this.fastify.db
-        .update(categoriesTable)
+        .update(categoryTable)
         .set({ name })
-        .where(eq(categoriesTable.id, id))
+        .where(eq(categoryTable.id, id))
         .returning()
         .execute()
       return result[0]
@@ -64,8 +64,8 @@ class CategoryService {
     await this.getById(id)
     try {
       const result = await this.fastify.db
-        .delete(categoriesTable)
-        .where(eq(categoriesTable.id, id))
+        .delete(categoryTable)
+        .where(eq(categoryTable.id, id))
         .returning()
         .execute()
       return result[0]
