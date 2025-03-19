@@ -1,6 +1,5 @@
 import AuthController from '../controllers/auth.controller'
-import { FastifyInstance } from 'fastify'
-
+import type { FastifyInstance } from 'fastify'
 
 export default async (fastify: FastifyInstance) => {
   const authController = new AuthController(fastify)
@@ -8,7 +7,7 @@ export default async (fastify: FastifyInstance) => {
     url: '/register',
     method: 'POST',
     //schema: userCreateSchema,
-    handler: authController.register.bind(authController),
+    handler: authController.register.bind(authController)
   })
 }
 
