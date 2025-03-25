@@ -33,9 +33,9 @@ export const itemTable = pgTable('item', {
 
 export const productTable = pgTable('product', {
   id: uuid().defaultRandom().primaryKey(),
-  itemId: uuid('item_id').notNull().references(() => itemTable.id),
+  itemId: uuid('item_id').notNull().references(() => itemTable.id, { onDelete: 'cascade' }),
   rarityId: uuid('rarity_id').notNull().references(() => rarityTable.id),
-  price: numeric({ precision: 10, scale: 2 }).default('0.00')
+  price: numeric({ precision: 10, scale: 2 }).notNull()
 }, (t) => [unique().on(t.itemId, t.rarityId)])
 
 export const itemToCategoryTable = pgTable('item_to_category', {

@@ -35,7 +35,7 @@ class ItemController {
   }
 
   async deleteById(req: ItemParamsRequest, res: ItemDeleteByIdResponse) {
-    return this.itemService.deleteById(req.id)
+    return this.itemService.deleteById(req.params.id)
   }
 }
 
