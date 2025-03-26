@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1742073797568,
+      "tag": "0000_wet_scorpion",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1742073882248,
+      "tag": "0001_seed-rarity",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742430691347,
+      "tag": "0002_nifty_spacker_dave",
+      "breakpoints": true
+    }
+  ]
+}

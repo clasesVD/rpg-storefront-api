@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
-import { userTable } from '../../db/schema'
+import { userTable } from '../../db'
 import type { UserDraft, UserUpdate } from '../schemas/user.schema'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'

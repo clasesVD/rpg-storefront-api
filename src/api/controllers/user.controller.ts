@@ -35,7 +35,7 @@ class UserController {
   }
 
   async deleteById(req: UserParamsRequest, res: UserDeleteByIdResponse) {
-    return this.userService.deleteById(req.id)
+    return this.userService.deleteById(req.params.id)
   }
 }
 
