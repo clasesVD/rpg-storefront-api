@@ -3,7 +3,7 @@ import swagger from '@fastify/swagger'
 import swaggerUI from '@fastify/swagger-ui'
 
 export default fp((fastify, options, done) => {
-  const swaggerOptions = {
+  fastify.register(swagger, {
     openapi: {
       openapi: '3.0.0',
       info: {
@@ -11,6 +11,16 @@ export default fp((fastify, options, done) => {
         description: 'The API documentation for RPG STOREFRONT',
         version: '0.0.1'
       },
+      components: {
+        securitySchemes: {
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          }
+        }
+      },
+      security: [{ BearerAuth: [] }],
       servers: [
         {
           url: `${fastify.config.HOST}:${fastify.config.PORT}`,
@@ -20,23 +30,14 @@ export default fp((fastify, options, done) => {
       externalDocs: {
         url: 'https://swagger.io',
         description: 'Find more info here'
-      }
+      },
+      ...options
     }
-  }
-
-  const swaggerUiOptions = {
-    routePrefix: '/docs',
-    staticCSP: true
-  }
-
-  fastify.register(swagger, {
-    ...swaggerOptions,
-    ...options
   })
 
   fastify.register(swaggerUI, {
-    ...swaggerUiOptions,
-    ...options
+    routePrefix: '/docs',
+    staticCSP: true
   })
 
   done()

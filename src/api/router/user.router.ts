@@ -10,6 +10,8 @@ import {
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
+  fastify.addHook('preHandler', fastify.authenticate)
+
   fastify.route({
     url: '/',
     method: 'GET',

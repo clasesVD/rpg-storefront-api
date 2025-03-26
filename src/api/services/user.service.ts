@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
 import { userTable } from '../../db'
 import type { UserDraft, UserUpdate } from '../schemas/user.schema'
+import { hashPassword } from '../../helpers/crypto'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'
 import InternalServerError from '../errors/InternalServerError'
@@ -19,11 +20,15 @@ class UserService {
 
   async create(draft: UserDraft) {
     try {
-      const result = await this.fastify.db.insert(userTable).values(draft).returning()
+      const password = hashPassword(draft.password)
+      const result = await this.fastify.db.insert(userTable).values({ ...draft, password }).returning()
       return result
     } catch (e) {
       if (e.message.startsWith('syntax error'))
         throw new BadRequestError('Invalid fields on user creation')
+
+      if (e.message.includes('duplicate key value violates unique constraint'))
+        throw new BadRequestError('There is already an account with the provided email')
 
       throw new InternalServerError('Failed to create user', e)
     }
@@ -55,6 +60,15 @@ class UserService {
       return result[0]
     } catch (e) {
       throw new InternalServerError(`Failed to delete user with ID:${id}`, e)
+    }
+  }
+
+  async getByEmail(email: string) {
+    try {
+      const result = await this.fastify.db.select().from(userTable).where(eq(userTable.email, email))
+      return result[0]
+    } catch (e) {
+      throw new InternalServerError('Failed to get user by email', e)
     }
   }
 }

@@ -9,8 +9,8 @@ export const userSchema = T.Object({
   balance: T.String()
 })
 
-const userDraftSchema = T.Omit(userSchema, ['id', 'balance'])
-const userPublicSchema = T.Omit(userSchema, ['password'])
+export const userDraftSchema = T.Omit(userSchema, ['id', 'balance'])
+export const userPublicSchema = T.Omit(userSchema, ['password'])
 const userParamsSchema = T.Pick(userSchema, ['id'])
 const userUpdateSchema = T.Partial(userDraftSchema)
 
