@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, uuid, primaryKey, varchar, numeric, unique } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, primaryKey, varchar, numeric, unique, integer } from 'drizzle-orm/pg-core'
 
 ////////////
 // Tables //
@@ -43,6 +43,17 @@ export const itemToCategoryTable = pgTable('item_to_category', {
   categoryId: uuid('category_id').references(() => categoryTable.id, { onDelete: 'cascade' })
 }, (t) => [primaryKey({ columns: [t.itemId, t.categoryId] })])
 
+export const cartTable = pgTable('cart', {
+  id: uuid().defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => userTable.id, { onDelete: 'cascade' })
+})
+
+export const cartToProductTable = pgTable('cart_to_product', {
+  cartId: uuid('cart_id').notNull().references(() => cartTable.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').notNull().references(() => productTable.id, { onDelete: 'cascade' }),
+  quantity: integer('quantity').notNull().default(1)
+}, (t) => [primaryKey({ columns: [t.cartId, t.productId] })])
+
 ///////////////
 // Relations //
 ///////////////
@@ -60,7 +71,7 @@ export const itemRelations = relations(itemTable, ({ many }) => ({
   itemToProduct: many(productTable)
 }))
 
-export const productRelations = relations(productTable, ({ one }) => ({
+export const productRelations = relations(productTable, ({ one, many }) => ({
   item: one(itemTable, {
     fields: [productTable.itemId],
     references: [itemTable.id]
@@ -68,7 +79,8 @@ export const productRelations = relations(productTable, ({ one }) => ({
   rarity: one(rarityTable, {
     fields: [productTable.rarityId],
     references: [rarityTable.id]
-  })
+  }),
+  cart: many(cartToProductTable)
 }))
 
 export const itemToCategoryRelations = relations(itemToCategoryTable, ({ one }) => ({
@@ -79,5 +91,24 @@ export const itemToCategoryRelations = relations(itemToCategoryTable, ({ one }) 
   category: one(itemTable, {
     fields: [itemToCategoryTable.itemId],
     references: [itemTable.id]
+  })
+}))
+
+export const cartRelations = relations(cartTable, ({ one, many }) => ({
+  user: one(userTable, {
+    fields: [cartTable.userId],
+    references: [userTable.id]
+  }),
+  product: many(cartToProductTable)
+}))
+
+export const cartToProductRelations = relations(cartToProductTable, ({ one }) => ({
+  cart: one(cartTable, {
+    fields: [cartToProductTable.cartId],
+    references: [cartTable.id]
+  }),
+  product: one(productTable, {
+    fields: [cartToProductTable.productId],
+    references: [productTable.id]
   })
 }))
