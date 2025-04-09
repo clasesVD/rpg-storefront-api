@@ -36,6 +36,7 @@ class UserService {
 
   async getById(id: string) {
     const result = await this.fastify.db.select().from(userTable).where(eq(userTable.id, id))
+
     if (!result[0]) throw new NotFoundError(`User with ID:${id} does not exist.`)
     return result[0]
   }
@@ -43,7 +44,11 @@ class UserService {
   async patchById(id: string, payload: UserUpdate) {
     await this.getById(id)
     try {
-      const result = await this.fastify.db.update(userTable).set(payload).where(eq(userTable.id, id)).returning()
+      const newData = { ...payload }
+
+      if ('password' in newData) newData.password = hashPassword(newData.password)
+
+      const result = await this.fastify.db.update(userTable).set(newData).where(eq(userTable.id, id)).returning()
       return result[0]
     } catch (e) {
       if (e.message.startsWith('syntax error'))

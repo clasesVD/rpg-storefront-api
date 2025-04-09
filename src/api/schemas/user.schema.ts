@@ -1,5 +1,6 @@
 import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { JWTPayload } from './auth.schema'
 
 export const userSchema = T.Object({
   id: T.String({ format: 'uuid' }),
@@ -8,11 +9,16 @@ export const userSchema = T.Object({
   password: T.String(),
   balance: T.String()
 })
+const userPasswordSchema = T.Object({
+  oldPassword: T.String(),
+  newPassword: T.String()
+})
 
 export const userDraftSchema = T.Omit(userSchema, ['id', 'balance'])
 export const userPublicSchema = T.Omit(userSchema, ['password'])
 const userParamsSchema = T.Pick(userSchema, ['id'])
-const userUpdateSchema = T.Partial(userDraftSchema)
+const userUpdateSchema = T.Partial(T.Omit(userSchema, ['id']))
+const updateMeSchema = T.Partial(T.Omit(userDraftSchema, ['password']))
 
 export const userGetAllSchema = {
   tags: ['User'],
@@ -57,16 +63,53 @@ export const userDeleteByIdSchema = {
   }
 }
 
+export const userGetMeSchema = {
+  tags: ['Me'],
+  security: [{ BearerAuth: [] }],
+  response: {
+    200: T.Object({
+      user: userPublicSchema
+      //cart
+      //orders
+    })
+  }
+}
+
+export const userPatchMeSchema = {
+  tags: ['Me'],
+  request: {
+    body: updateMeSchema
+  },
+  body: updateMeSchema,
+  response: {
+    200: userPublicSchema
+  }
+}
+
+export const userChangePasswordSchema = {
+  tags: ['Me'],
+  request: {
+    body: userPasswordSchema
+  },
+  body: userPasswordSchema,
+  response: {
+    200: T.Object({
+      message: T.String()
+    })
+  }
+}
+
 export type User = Static<typeof userSchema>
 export type UserDraft = Static<typeof userDraftSchema>
 export type UserPublic = Static<typeof userPublicSchema>
 export type UserParams = Static<typeof userParamsSchema>
 export type UserUpdate = Static<typeof userUpdateSchema>
+export type UserPatchMe = Static<typeof updateMeSchema>
+export type UserChangePassword = Static<typeof userPasswordSchema>
 export type UserGetAll = FastifyReply<{ Body: User[] }>
 export type UserCreateRequest = FastifyRequest<{ Body: UserDraft }>
-export type UserCreateResponse = FastifyReply<{ Body: UserPublic }>
 export type UserParamsRequest = FastifyRequest<{ Params: UserParams }>
-export type UserGetByIdResponse = FastifyReply<{ Body: UserPublic }>
 export type UserPatchByIdRequest = FastifyRequest<{ Body: UserUpdate, Params: UserParams }>
-export type UserPatchByIdResponse = FastifyReply<{ Body: UserPublic }>
-export type UserDeleteByIdResponse = FastifyReply<{ Body: UserPublic }>
+export type UserGetMeRequest = FastifyRequest & { user: JWTPayload }
+export type UserPatchMeRequest = FastifyRequest<{ Body: UserPatchMe }> & { user: JWTPayload }
+export type UserChangePasswordRequest = FastifyRequest<{ Body: UserChangePassword }> & { user: JWTPayload }

@@ -5,6 +5,7 @@ import categoryRouter from './category.router'
 import itemRouter from './item.router'
 import productRouter from './product.router'
 import authRouter from './auth.router'
+import meRouter from './me.router'
 
 export default fp((fastify, _, done) => {
   fastify.route({
@@ -17,8 +18,7 @@ export default fp((fastify, _, done) => {
   })
 
   fastify.register(userRouter, {
-    prefix: '/users',
-    onRequest: fastify.authenticate
+    prefix: '/users'
   })
 
   fastify.register(categoryRouter, {
@@ -35,6 +35,10 @@ export default fp((fastify, _, done) => {
 
   fastify.register(authRouter, {
     prefix: '/auth'
+  })
+
+  fastify.register(meRouter, {
+    prefix: '/me'
   })
 
   done()

@@ -2,9 +2,8 @@ import type { FastifyInstance } from 'fastify'
 import UserService from '../services/user.service'
 import type {
   AuthRegisterRequest,
-  AuthRegisterResponse,
   AuthLoginRequest,
-  AuthLoginResponse
+  JWTPayload
 } from '../schemas/auth.schema'
 import { verifyPassword } from '../../helpers/crypto'
 import BadRequestError from '../errors/BadRequestError'
@@ -18,12 +17,12 @@ class AuthController {
     this.fastify = fastify
   }
 
-  async register(req: AuthRegisterRequest, res: AuthRegisterResponse) {
+  async register(req: AuthRegisterRequest) {
     const result = await this.userService.create(req.body)
     return result[0]
   }
 
-  async login(req: AuthLoginRequest, res: AuthLoginResponse) {
+  async login(req: AuthLoginRequest) {
     const { password, ...user } = await this.userService.getByEmail(req.body.email)
     const isValidPassword = verifyPassword(req.body.password, password)
 
@@ -34,7 +33,7 @@ class AuthController {
       sub: user.id,
       iat: Date.now(),
       exp: 10800000 + (Date.now())
-    })
+    } as JWTPayload)
 
     const response = { token, user }
     return response
