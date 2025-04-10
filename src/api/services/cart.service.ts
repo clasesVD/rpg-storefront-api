@@ -1,13 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { and, eq, sql } from 'drizzle-orm'
 import { cartTable, cartToProductTable, productTable } from '../../db'
-import type {
-  CartDraft,
-  CartProductDto,
-  CartProductUpdateDto,
-  CartParams,
-  CartProductParams
-} from '../schemas/cart.schema'
+import type { CartItem } from '../schemas/cart.schema'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'
 import InternalServerError from '../errors/InternalServerError'
@@ -54,16 +48,16 @@ class CartService {
     }
   }
 
-  async getById(params: CartParams) {
+  async getById(cartId: string) {
     try {
       const [ cart ] = await this.fastify.db
         .select()
         .from(cartTable)
-        .where(eq(cartTable.id, params.id))
+        .where(eq(cartTable.id, cartId))
         .execute()
 
       if (!cart) {
-        throw new NotFoundError(`Cart with ID: ${params.id} does not exist.`)
+        throw new NotFoundError(`Cart with ID: ${cartId} does not exist.`)
       }
 
       const products = await this.fastify.db
@@ -72,7 +66,7 @@ class CartService {
           quantity: cartToProductTable.quantity
         })
         .from(cartToProductTable)
-        .where(eq(cartToProductTable.cartId, params.id))
+        .where(eq(cartToProductTable.cartId, cartId))
         .innerJoin(
           productTable,
           eq(cartToProductTable.productId, productTable.id)
@@ -85,23 +79,23 @@ class CartService {
       }
     } catch (error) {
       if (error instanceof NotFoundError) throw error
-      throw new InternalServerError(`Failed to get cart with ID: ${params.id}`, error)
+      throw new InternalServerError(`Failed to get cart with ID: ${cartId}`, error)
     }
   }
 
-  async create(draft: CartDraft) {
+  async create(userId: string) {
     try {
       const [ existingCart ] = await this.fastify.db
         .select()
         .from(cartTable)
-        .where(eq(cartTable.userId, draft.userId))
+        .where(eq(cartTable.userId, userId))
         .execute()
 
       if (existingCart) return existingCart
 
       const [ newCart ] = await this.fastify.db
         .insert(cartTable)
-        .values({ userId: draft.userId })
+        .values({ userId: userId })
         .returning()
         .execute()
 
@@ -117,45 +111,45 @@ class CartService {
     }
   }
 
-  async delete(params: CartParams) {
+  async deleteById(cartId: string) {
     try {
-      await this.getById(params)
+      await this.getById(cartId)
 
       const [ deletedCart ] = await this.fastify.db
         .delete(cartTable)
-        .where(eq(cartTable.id, params.id))
+        .where(eq(cartTable.id, cartId))
         .returning()
         .execute()
 
       return deletedCart
     } catch (error) {
       if (error instanceof NotFoundError) throw error
-      throw new InternalServerError(`Failed to delete cart with ID: ${params.id}`, error)
+      throw new InternalServerError(`Failed to delete cart with ID: ${cartId}`, error)
     }
   }
 
-  async addProduct(params: CartParams, dto: CartProductDto) {
+  async addProduct(cartId: string, cartItem: CartItem) {
     try {
-      if (dto.quantity <= 0) {
+      if (cartItem.quantity <= 0) {
         throw new BadRequestError('Quantity must be greater than 0')
       }
 
-      await this.getById(params)
+      await this.getById(cartId)
 
       const [ product ] = await this.fastify.db
         .select()
         .from(productTable)
-        .where(eq(productTable.id, dto.productId))
+        .where(eq(productTable.id, cartItem.productId))
         .execute()
 
       if (!product) {
-        throw new NotFoundError(`Product with ID: ${dto.productId} not found`)
+        throw new NotFoundError(`Product with ID: ${cartItem.productId} not found`)
       }
 
       const draft = {
-        cartId: params.id,
-        productId: dto.productId,
-        quantity: dto.quantity
+        cartId: cartId,
+        productId: cartItem.productId,
+        quantity: cartItem.quantity
       }
 
       await this.fastify.db
@@ -164,74 +158,70 @@ class CartService {
         .onConflictDoUpdate({
           target: [cartToProductTable.cartId, cartToProductTable.productId],
           set: {
-            [cartToProductTable.quantity.name]: sql`${cartToProductTable.quantity} + ${dto.quantity}`
+            [cartToProductTable.quantity.name]: sql`${cartToProductTable.quantity} + ${cartItem.quantity}`
           }
         })
         .execute()
 
-      return this.getById(params)
+      return this.getById(cartId)
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error
       }
-      throw new InternalServerError(`Failed to add product with ID: ${dto.productId} to cart`, error)
+      throw new InternalServerError(`Failed to add product with ID: ${cartItem.productId} to cart`, error)
     }
   }
 
-  async updateProduct(params: CartProductParams, dto: CartProductUpdateDto) {
+  async updateProduct(cartId: string, productId: string, quantity: number) {
     try {
-      if (dto.quantity < 0) {
-        throw new BadRequestError('Quantity cannot be negative')
-      }
-
-      if (dto.quantity === 0) {
-        return this.removeProduct(params)
+      if (quantity <= 0) {
+        return this.removeProduct(cartId, productId)
       }
 
       const { rowCount } = await this.fastify.db
         .update(cartToProductTable)
-        .set({ [cartToProductTable.quantity.name]: dto.quantity })
+        .set({ [cartToProductTable.quantity.name]: quantity })
         .where(
           and(
-            eq(cartToProductTable.cartId, params.cartId),
-            eq(cartToProductTable.productId, params.productId)
+            eq(cartToProductTable.cartId, cartId),
+            eq(cartToProductTable.productId, productId)
           )
         )
         .execute()
 
       if (rowCount === 0) {
-        throw new NotFoundError(`Product with ID: ${params.productId} not found in cart`)
+        throw new NotFoundError(`Product with ID: ${productId} not found in cart`)
       }
 
-      return this.getById({ id: params.cartId })
+      return this.getById(cartId)
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error
       }
-      throw new InternalServerError(`Failed to update product with ID: ${params.productId} in cart`, error)
+      throw new InternalServerError(`Failed to update product with ID: ${productId} in cart`, error)
     }
   }
 
-  async removeProduct(params: CartProductParams) {
+  async removeProduct(cartId: string, productId: string) {
     try {
       const { rowCount } = await this.fastify.db
         .delete(cartToProductTable)
         .where(
           and(
-            eq(cartToProductTable.cartId, params.cartId),
-            eq(cartToProductTable.productId, params.productId)
+            eq(cartToProductTable.cartId, cartId),
+            eq(cartToProductTable.productId, productId)
           )
         )
         .execute()
 
       if (rowCount === 0) {
-        throw new NotFoundError(`Product with ID: ${params.productId} not found in cart`)
+        throw new NotFoundError(`Product with ID: ${productId} not found in cart`)
       }
 
-      return this.getById({ id: params.cartId })
+      return this.getById(cartId)
     } catch (error) {
       if (error instanceof NotFoundError) throw error
-      throw new InternalServerError(`Failed to remove product with ID: ${params.productId} from cart`, error)
+      throw new InternalServerError(`Failed to remove product with ID: ${productId} from cart`, error)
     }
   }
 }

@@ -17,12 +17,12 @@ export const cartPublicSchema = cartSchema
 export const cartDraftSchema = T.Pick(cartSchema, ['userId'])
 export const cartParamsSchema = T.Pick(cartSchema, ['id'])
 
-export const cartProductDtoSchema = T.Object({
+export const cartItemSchema = T.Object({
   productId: T.String({ format: 'uuid' }),
   quantity: T.Integer({ minimum: 1 })
 })
 
-export const cartProductUpdateDtoSchema = T.Pick(cartProductDtoSchema, ['quantity'])
+export const cartProductUpdateSchema = T.Pick(cartItemSchema, ['quantity'])
 export const cartProductParamsSchema = T.Object({
   cartId: T.String({ format: 'uuid' }),
   productId: T.String({ format: 'uuid' })
@@ -57,9 +57,9 @@ export const cartAddProductSchema = {
   tags: ['Cart'],
   request: {
     params: cartParamsSchema,
-    body: cartProductDtoSchema
+    body: cartItemSchema
   },
-  body: cartProductDtoSchema,
+  body: cartItemSchema,
   response: {
     200: cartPublicSchema
   }
@@ -69,9 +69,9 @@ export const cartUpdateProductSchema = {
   tags: ['Cart'],
   request: {
     params: cartProductParamsSchema,
-    body: cartProductUpdateDtoSchema
+    body: cartProductUpdateSchema
   },
-  body: cartProductUpdateDtoSchema,
+  body: cartProductUpdateSchema,
   response: {
     200: cartPublicSchema
   }
@@ -100,17 +100,17 @@ export const cartDeleteSchema = {
 export type Cart = Static<typeof cartPublicSchema>
 export type CartDraft = Static<typeof cartDraftSchema>
 export type CartParams = Static<typeof cartParamsSchema>
-export type CartProductDto = Static<typeof cartProductDtoSchema>
-export type CartProductUpdateDto = Static<typeof cartProductUpdateDtoSchema>
+export type CartItem = Static<typeof cartItemSchema>
+export type CartProductUpdate = Static<typeof cartProductUpdateSchema>
 export type CartProductParams = Static<typeof cartProductParamsSchema>
 export type CartGetAllResponse = FastifyReply<{ Body: Cart[] }>
-export type CartGetByIdRequest = FastifyRequest<{ Params: CartParams }>
+export type CartGetByIdRequest = FastifyRequest<{ Body: CartDraft }>
 export type CartGetByIdResponse = FastifyReply<{ Body: Cart }>
 export type CartCreateRequest = FastifyRequest<{ Body: CartDraft }>
 export type CartCreateResponse = FastifyReply<{ Body: Cart }>
-export type CartAddProductRequest = FastifyRequest<{ Params: CartParams, Body: CartProductDto }>
+export type CartAddProductRequest = FastifyRequest<{ Params: CartParams, Body: CartItem }>
 export type CartAddProductResponse = FastifyReply<{ Body: Cart }>
-export type CartUpdateProductRequest = FastifyRequest<{ Params: CartProductParams, Body: CartProductUpdateDto }>
+export type CartUpdateProductRequest = FastifyRequest<{ Params: CartProductParams, Body: CartProductUpdate }>
 export type CartUpdateProductResponse = FastifyReply<{ Body: Cart }>
 export type CartRemoveProductRequest = FastifyRequest<{ Params: CartProductParams }>
 export type CartRemoveProductResponse = FastifyReply<{ Body: Cart }>

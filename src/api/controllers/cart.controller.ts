@@ -21,27 +21,34 @@ class CartController {
   }
 
   async getById(req: CartGetByIdRequest) {
-    return this.cartService.getById(req.params)
+    const { userId } = req.body
+    return this.cartService.getById(userId)
   }
 
   async create(req: CartCreateRequest) {
-    return this.cartService.create(req.body)
+    const { userId } = req.body
+    return this.cartService.create(userId)
   }
 
   async addProduct(req: CartAddProductRequest) {
-    return this.cartService.addProduct(req.params, req.body)
+    const { id } = req.params
+    return this.cartService.addProduct(id, req.body)
   }
 
   async updateProduct(req: CartUpdateProductRequest) {
-    return this.cartService.updateProduct(req.params, req.body)
+    const { cartId, productId } = req.params
+    const { quantity } = req.body
+    return this.cartService.updateProduct(cartId, productId, quantity)
   }
 
   async removeProduct(req: CartRemoveProductRequest) {
-    return this.cartService.removeProduct(req.params)
+    const { cartId, productId } = req.params
+    return this.cartService.removeProduct(cartId, productId)
   }
 
   async delete(req: CartDeleteRequest) {
-    return this.cartService.delete(req.params)
+    const { id } = req.params
+    return this.cartService.deleteById(id)
   }
 }
 

@@ -39,7 +39,7 @@ export default fp((fastify, _, done) => {
   })
 
   fastify.register(cartRouter, {
-    prefix: '/cart'
+    prefix: '/carts'
   })
 
   fastify.register(meRouter, {
