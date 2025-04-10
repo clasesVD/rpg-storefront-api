@@ -8,10 +8,10 @@ export const productSchema = T.Object({
   price: T.Number()
 })
 
-const productDraftSchema = T.Omit(productSchema, ['id'])
-const productPublicSchema = productSchema
-const productParamsSchema = T.Pick(productSchema, ['id'])
-const productUpdateSchema = T.Omit(productDraftSchema, ['itemId', 'rarityId'])
+export const productDraftSchema = T.Omit(productSchema, ['id'])
+export const productPublicSchema = productSchema
+export const productParamsSchema = T.Pick(productSchema, ['id'])
+export const productUpdateSchema = T.Omit(productDraftSchema, ['itemId', 'rarityId'])
 
 export const productGetAllSchema = {
   tags: ['Product'],
