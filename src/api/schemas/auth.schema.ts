@@ -1,11 +1,10 @@
 import { Type as T, type Static } from '@sinclair/typebox'
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyRequest } from 'fastify'
 import {
   userPublicSchema,
   userSchema,
   userDraftSchema,
-  type UserCreateRequest,
-  type UserCreateResponse
+  type UserCreateRequest
 } from './user.schema'
 
 const loginDraftSchema = T.Pick(userSchema, ['email', 'password'])
@@ -37,8 +36,11 @@ export const loginSchema = {
 }
 
 export type LoginDraft = Static<typeof loginDraftSchema>
-export type LoginResponse = Static<typeof loginResponseSchema>
 export type AuthLoginRequest = FastifyRequest<{ Body: LoginDraft }>
-export type AuthLoginResponse = FastifyReply<{ Body: LoginResponse }>
 export type AuthRegisterRequest = UserCreateRequest
-export type AuthRegisterResponse = UserCreateResponse
+export type JWTPayload = {
+  iss: string;
+  sub: string;
+  iat: number;
+  exp: number;
+}
