@@ -4,6 +4,7 @@ import { registerSchema, loginSchema } from '../schemas/auth.schema'
 
 export default async (fastify: FastifyInstance) => {
   const authController = new AuthController(fastify)
+
   fastify.route({
     url: '/register',
     method: 'POST',

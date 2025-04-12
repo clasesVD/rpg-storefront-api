@@ -7,10 +7,14 @@ import {
   productPatchByIdSchema,
   productDeleteByIdSchema
 } from '../schemas/product.schema'
+import { ROLE } from '../../enums/roles'
 
 export default async (fastify: FastifyInstance) => {
   const productController = new ProductController(fastify)
-  fastify.addHook('onRequest', fastify.authenticate)
+  fastify.addHook('onRequest', async (req, res) => {
+    await fastify.authenticate(req, res)
+    await fastify.hasRole(ROLE.ADMIN)(req, res)
+  })
 
   fastify.route({
     url: '/',

@@ -1,5 +1,20 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, uuid, primaryKey, varchar, numeric, unique, integer } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  primaryKey,
+  varchar,
+  numeric,
+  unique,
+  integer,
+  pgEnum
+} from 'drizzle-orm/pg-core'
+
+////////////
+// Enums  //
+////////////
+
+export const userRoleEnum = pgEnum('user_role', ['A', 'C'])
 
 ////////////
 // Tables //
@@ -10,7 +25,8 @@ export const userTable = pgTable('user', {
   name: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }).notNull(),
-  balance: numeric({ precision: 10, scale: 2 }).default('0.00')
+  balance: numeric({ precision: 10, scale: 2 }).default('0.00'),
+  role: userRoleEnum('role').notNull()
 })
 
 export const categoryTable = pgTable('category', {

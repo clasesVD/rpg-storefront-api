@@ -32,7 +32,8 @@ class AuthController {
       iss: 'rpg-storefront',
       sub: user.id,
       iat: Date.now(),
-      exp: 10800000 + (Date.now())
+      exp: 10800000 + (Date.now()),
+      role: user.role
     } as JWTPayload)
 
     const response = { token, user }

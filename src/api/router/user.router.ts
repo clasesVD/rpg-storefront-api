@@ -7,10 +7,14 @@ import {
   userPatchByIdSchema,
   userDeleteByIdSchema
 } from '../schemas/user.schema'
+import { ROLE } from '../../enums/roles'
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
-  fastify.addHook('onRequest', fastify.authenticate)
+  fastify.addHook('onRequest', async (req, res) => {
+    await fastify.authenticate(req, res)
+    await fastify.hasRole(ROLE.ADMIN)(req, res)
+  })
 
   fastify.route({
     url: '/',
