@@ -10,6 +10,8 @@ import {
 
 export default async (fastify: FastifyInstance) => {
   const productController = new ProductController(fastify)
+  fastify.addHook('onRequest', fastify.authenticate)
+
   fastify.route({
     url: '/',
     method: 'GET',
