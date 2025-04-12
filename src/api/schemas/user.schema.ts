@@ -1,14 +1,17 @@
 import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { JWTPayload } from './auth.schema'
+import { roleEnum } from '../../enums/roles'
 
 export const userSchema = T.Object({
   id: T.String({ format: 'uuid' }),
   name: T.String(),
   email: T.String({ format:'email' }),
   password: T.String(),
-  balance: T.String()
+  balance: T.String(),
+  role: roleEnum
 })
+
 const userPasswordSchema = T.Object({
   oldPassword: T.String(),
   newPassword: T.String()

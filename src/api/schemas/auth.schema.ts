@@ -6,6 +6,7 @@ import {
   userDraftSchema,
   type UserCreateRequest
 } from './user.schema'
+import type { ROLE } from '../../enums/roles'
 
 const loginDraftSchema = T.Pick(userSchema, ['email', 'password'])
 const loginResponseSchema = T.Object({
@@ -43,4 +44,5 @@ export type JWTPayload = {
   sub: string;
   iat: number;
   exp: number;
+  role: ROLE
 }
