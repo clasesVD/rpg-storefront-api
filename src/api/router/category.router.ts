@@ -10,6 +10,7 @@ import {
 
 export default async (fastify: FastifyInstance) => {
   const categoryController = new CategoryController(fastify)
+  fastify.addHook('onRequest', fastify.authenticate)
 
   fastify.route({
     url: '/',
