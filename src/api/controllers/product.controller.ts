@@ -2,12 +2,8 @@ import type { FastifyInstance } from 'fastify'
 import ProductService from '../services/product.service'
 import type {
   ProductCreateRequest,
-  ProductCreateResponse,
   ProductParamsRequest,
-  ProductGetByIdResponse,
-  ProductPatchByIdRequest,
-  ProductPatchByIdResponse,
-  ProductDeleteByIdResponse
+  ProductPatchByIdRequest
 } from '../schemas/product.schema'
 
 class ProductController {
@@ -21,20 +17,20 @@ class ProductController {
     return this.productService.getAll()
   }
 
-  async create(req: ProductCreateRequest, res: ProductCreateResponse) {
+  async create(req: ProductCreateRequest) {
     const result = await this.productService.create(req.body)
     return result[0]
   }
 
-  async getById(req: ProductParamsRequest, res: ProductGetByIdResponse) {
+  async getById(req: ProductParamsRequest) {
     return this.productService.getById(req.params.id)
   }
 
-  async patchById(req: ProductPatchByIdRequest, res: ProductPatchByIdResponse) {
+  async patchById(req: ProductPatchByIdRequest) {
     return this.productService.patchById(req.params.id, req.body)
   }
 
-  async deleteById(req: ProductParamsRequest, res: ProductDeleteByIdResponse) {
+  async deleteById(req: ProductParamsRequest) {
     return this.productService.deleteById(req.params.id)
   }
 }
