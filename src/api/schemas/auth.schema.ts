@@ -44,5 +44,5 @@ export type JWTPayload = {
   sub: string;
   iat: number;
   exp: number;
-  role: ROLE
+  role: ROLE;
 }

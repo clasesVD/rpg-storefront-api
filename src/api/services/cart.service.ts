@@ -50,33 +50,33 @@ class CartService {
 
   async getById(cartId: string) {
     try {
-      const [ cart ] = await this.fastify.db
-        .select()
-        .from(cartTable)
-        .where(eq(cartTable.id, cartId))
-        .execute()
-
-      if (!cart) {
-        throw new NotFoundError(`Cart with ID: ${cartId} does not exist.`)
-      }
-
-      const products = await this.fastify.db
+      const result = await this.fastify.db
         .select({
+          cart: cartTable,
           product: productTable,
           quantity: cartToProductTable.quantity
         })
-        .from(cartToProductTable)
-        .where(eq(cartToProductTable.cartId, cartId))
+        .from(cartTable)
+        .leftJoin(
+          cartToProductTable,
+          eq(cartTable.id, cartToProductTable.cartId)
+        )
         .innerJoin(
           productTable,
-          eq(cartToProductTable.productId, productTable.id)
+          eq(cartToProductTable.productId, productTable)
         )
+        .where(eq(cartTable.id, cartId))
         .execute()
 
-      return {
-        ...cart,
-        products
+      if (!result.length) {
+        throw new NotFoundError(`Cart with ID: ${cartId} does not exist.`)
       }
+
+      return {
+        ...result[0].cart,
+        products: result.map(({ cart: _, ...products }) => products)
+      }
+
     } catch (error) {
       if (error instanceof NotFoundError) throw error
       throw new InternalServerError(`Failed to get cart with ID: ${cartId}`, error)
