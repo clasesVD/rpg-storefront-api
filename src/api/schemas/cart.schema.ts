@@ -1,6 +1,7 @@
 import { Type as T, type Static } from '@sinclair/typebox'
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyRequest } from 'fastify'
 import { productPublicSchema } from './product.schema'
+import type { JWTPayload } from './auth.schema'
 
 const cartSchema = T.Object({
   id: T.String({ format: 'uuid' }),
@@ -27,6 +28,7 @@ export const cartProductParamsSchema = T.Object({
   cartId: T.String({ format: 'uuid' }),
   productId: T.String({ format: 'uuid' })
 })
+export const cartProductParamsMeSchema = T.Pick(cartProductParamsSchema, ['productId'])
 
 export const cartGetAllSchema = {
   tags: ['Cart'],
@@ -103,9 +105,12 @@ export type CartParams = Static<typeof cartParamsSchema>
 export type CartItem = Static<typeof cartItemSchema>
 export type CartProductUpdate = Static<typeof cartProductUpdateSchema>
 export type CartProductParams = Static<typeof cartProductParamsSchema>
+export type CartProductParamsMe = Static<typeof cartProductParamsMeSchema>
 export type CartGetByIdRequest = FastifyRequest<{ Body: CartDraft }>
 export type CartCreateRequest = FastifyRequest<{ Body: CartDraft }>
 export type CartAddProductRequest = FastifyRequest<{ Params: CartParams, Body: CartItem }>
 export type CartUpdateProductRequest = FastifyRequest<{ Params: CartProductParams, Body: CartProductUpdate }>
 export type CartRemoveProductRequest = FastifyRequest<{ Params: CartProductParams }>
 export type CartDeleteRequest = FastifyRequest<{ Params: CartParams }>
+export type CartAddProductMeRequest = FastifyRequest<{ Body: CartItem }> & { user: JWTPayload }
+export type CartUpdateProductMeRequest = FastifyRequest<{ Params: CartProductParamsMe, Body: CartProductUpdate }> & { user: JWTPayload }

@@ -22,6 +22,10 @@ export default fp((fastify, _, done) => {
     prefix: '/auth'
   })
 
+  fastify.register(meRouter, {
+    prefix: '/me'
+  })
+
   fastify.register(userRouter, {
     prefix: '/users'
   })
@@ -40,10 +44,6 @@ export default fp((fastify, _, done) => {
 
   fastify.register(cartRouter, {
     prefix: '/carts'
-  })
-
-  fastify.register(meRouter, {
-    prefix: '/me'
   })
 
   done()
