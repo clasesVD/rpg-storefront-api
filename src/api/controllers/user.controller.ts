@@ -1,21 +1,25 @@
 import type { FastifyInstance } from 'fastify'
 import UserService from '../services/user.service'
+import CartService from '../services/cart.service'
 import type {
   UserCreateRequest,
   UserParamsRequest,
   UserPatchByIdRequest,
   UserPatchMeRequest,
   UserGetMeRequest,
-  UserChangePasswordRequest
+  UserChangePasswordRequest,
+  UserDeleteCartRequest
 } from '../schemas/user.schema'
 import { verifyPassword } from '../../helpers/crypto'
 import BadRequestError from '../errors/BadRequestError'
 
 class UserController {
   userService: UserService
+  cartService: CartService
 
   constructor(fastify: FastifyInstance) {
     this.userService = new UserService(fastify)
+    this.cartService = new CartService(fastify)
   }
 
   async getAll() {
@@ -42,12 +46,12 @@ class UserController {
   async getMe(req: UserGetMeRequest) {
     const userId = req.user.sub
     const user = await this.userService.getById(userId)
-    //const activeCart = await this.cartService.getById(userId)
+    const cart = await this.cartService.getByUserId(userId).catch(() => null)
     //const orders = await this.orderService.getById(userId)
 
     return {
-      user//,
-      //activeCart,
+      user,
+      cart
       //orders
     }
   }
@@ -67,6 +71,12 @@ class UserController {
     if (!isValidPassword) throw new BadRequestError('Invalid password')
     await this.userService.patchById(userId, { password: newPassword })
     return { message: 'Password changed successfully' }
+  }
+
+  async deleteMeCart(req: UserDeleteCartRequest) {
+    const userId = req.user.sub
+    await this.cartService.deleteByUserId(userId)
+    return { message: 'Cart deleted successfully' }
   }
 }
 

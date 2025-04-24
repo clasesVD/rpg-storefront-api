@@ -2,11 +2,17 @@ import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { JWTPayload } from './auth.schema'
 import { roleEnum } from '../../enums/roles'
+import {
+  cartItemSchema,
+  cartProductParamsMeSchema,
+  cartProductUpdateSchema,
+  cartPublicSchema
+} from './cart.schema'
 
 export const userSchema = T.Object({
   id: T.String({ format: 'uuid' }),
   name: T.String(),
-  email: T.String({ format:'email' }),
+  email: T.String({ format: 'email' }),
   password: T.String(),
   balance: T.String(),
   role: roleEnum
@@ -19,7 +25,7 @@ const userPasswordSchema = T.Object({
 
 export const userDraftSchema = T.Omit(userSchema, ['id', 'balance'])
 export const userPublicSchema = T.Omit(userSchema, ['password'])
-const userParamsSchema = T.Pick(userSchema, ['id'])
+export const userParamsSchema = T.Pick(userSchema, ['id'])
 const userUpdateSchema = T.Partial(T.Omit(userSchema, ['id']))
 const updateMeSchema = T.Partial(T.Omit(userDraftSchema, ['password']))
 
@@ -66,19 +72,18 @@ export const userDeleteByIdSchema = {
   }
 }
 
-export const userGetMeSchema = {
+export const meGetSchema = {
   tags: ['Me'],
-  security: [{ BearerAuth: [] }],
   response: {
     200: T.Object({
-      user: userPublicSchema
-      //cart
+      user: userPublicSchema,
+      cart: cartPublicSchema
       //orders
     })
   }
 }
 
-export const userPatchMeSchema = {
+export const mePatchSchema = {
   tags: ['Me'],
   request: {
     body: updateMeSchema
@@ -89,12 +94,44 @@ export const userPatchMeSchema = {
   }
 }
 
-export const userChangePasswordSchema = {
+export const meChangePasswordSchema = {
   tags: ['Me'],
   request: {
     body: userPasswordSchema
   },
   body: userPasswordSchema,
+  response: {
+    200: T.Object({
+      message: T.String()
+    })
+  }
+}
+
+export const meAddProductSchema = {
+  tags: ['Me'],
+  request: {
+    body: cartItemSchema
+  },
+  body: cartItemSchema,
+  response: {
+    200: cartPublicSchema
+  }
+}
+
+export const meChangeProductQuantitySchema = {
+  tags: ['Me'],
+  request: {
+    body: cartProductUpdateSchema,
+    params: cartProductParamsMeSchema
+  },
+  body: cartProductUpdateSchema,
+  response: {
+    200: cartPublicSchema
+  }
+}
+
+export const meDeleteCartSchema = {
+  tags: ['Me'],
   response: {
     200: T.Object({
       message: T.String()
@@ -116,3 +153,4 @@ export type UserPatchByIdRequest = FastifyRequest<{ Body: UserUpdate, Params: Us
 export type UserGetMeRequest = FastifyRequest & { user: JWTPayload }
 export type UserPatchMeRequest = FastifyRequest<{ Body: UserPatchMe }> & { user: JWTPayload }
 export type UserChangePasswordRequest = FastifyRequest<{ Body: UserChangePassword }> & { user: JWTPayload }
+export type UserDeleteCartRequest = FastifyRequest & { user: JWTPayload }

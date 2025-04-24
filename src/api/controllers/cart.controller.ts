@@ -1,11 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import CartService from '../services/cart.service'
 import type {
+  CartAddProductMeRequest,
   CartAddProductRequest,
   CartCreateRequest,
   CartDeleteRequest,
   CartGetByIdRequest,
   CartRemoveProductRequest,
+  CartUpdateProductMeRequest,
   CartUpdateProductRequest
 } from '../schemas/cart.schema'
 
@@ -49,6 +51,27 @@ class CartController {
   async delete(req: CartDeleteRequest) {
     const { id } = req.params
     return this.cartService.deleteById(id)
+  }
+
+  async addProductMe(req: CartAddProductMeRequest) {
+    const userId = req.user.sub
+    let cart = await this.cartService.getByUserId(userId).catch(() => null)
+    const cartItem = req.body
+
+    if (!cart) {
+      cart = await this.cartService.create(userId)
+    }
+
+    return this.cartService.addProduct(cart.id, cartItem)
+  }
+
+  async updateProductMe(req: CartUpdateProductMeRequest) {
+    const userId = req.user.sub
+    const { productId } = req.params
+    const { quantity } = req.body
+    const cart = await this.cartService.getByUserId(userId)
+
+    return this.cartService.updateProduct(cart.id, productId, quantity)
   }
 }
 

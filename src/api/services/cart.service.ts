@@ -83,6 +83,40 @@ class CartService {
     }
   }
 
+  async getByUserId(userId: string) {
+    try {
+      const result = await this.fastify.db
+        .select({
+          cart: cartTable,
+          product: productTable,
+          quantity: sql<number>`COALESCE(${cartToProductTable.quantity}, 0)`
+        })
+        .from(cartTable)
+        .leftJoin(
+          cartToProductTable,
+          eq(cartTable.id, cartToProductTable.cartId)
+        )
+        .innerJoin(
+          productTable,
+          eq(cartToProductTable.productId, productTable.id)
+        )
+        .where(eq(cartTable.userId, userId))
+        .execute()
+
+      if (!result.length) {
+        throw new NotFoundError(`Cart for the userID: ${userId} does not exist.`)
+      }
+
+      return {
+        ...result[0].cart,
+        products: result.map(({ cart: _, ...products }) => products)
+      }
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error
+      throw new InternalServerError(`Failed to get cart for user with ID: ${userId}`, error)
+    }
+  }
+
   async create(userId: string) {
     try {
       const [ existingCart ] = await this.fastify.db
@@ -222,6 +256,16 @@ class CartService {
     } catch (error) {
       if (error instanceof NotFoundError) throw error
       throw new InternalServerError(`Failed to remove product with ID: ${productId} from cart`, error)
+    }
+  }
+
+  async deleteByUserId(userId: string) {
+    try {
+      const cart = await this.getByUserId(userId)
+      const deleted = await this.deleteById(cart.id)
+      return deleted
+    } catch (error) {
+      throw new InternalServerError(`Failed to delete cart for user with ID: ${userId}`, error)
     }
   }
 }
