@@ -9,11 +9,16 @@ import {
   meDeleteCartSchema
 } from '../schemas/user.schema'
 import CartController from '../controllers/cart.controller'
+import { ROLE } from '../../enums/roles'
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
   const cartController = new CartController(fastify)
-  fastify.addHook('onRequest', fastify.authenticate)
+
+  fastify.addHook('onRequest', async (req, res) => {
+    await fastify.authenticate(req, res)
+    await fastify.hasRole([ ROLE.ADMIN, ROLE.CUSTOMER ])(req, res)
+  })
 
   fastify.route({
     url: '/',

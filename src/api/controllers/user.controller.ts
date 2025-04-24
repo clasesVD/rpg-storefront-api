@@ -76,7 +76,7 @@ class UserController {
   async deleteMeCart(req: UserDeleteCartRequest) {
     const userId = req.user.sub
     await this.cartService.deleteByUserId(userId)
-    return { message: 'Cart deleted successfully ' }
+    return { message: 'Cart deleted successfully' }
   }
 }
 
