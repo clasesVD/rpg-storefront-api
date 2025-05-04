@@ -7,6 +7,7 @@ import productRouter from './product.router'
 import authRouter from './auth.router'
 import meRouter from './me.router'
 import cartRouter from './cart.router'
+import rarityRouter from './rarity.router'
 
 export default fp((fastify, _, done) => {
   fastify.route({
@@ -32,6 +33,10 @@ export default fp((fastify, _, done) => {
 
   fastify.register(categoryRouter, {
     prefix: '/categories'
+  })
+
+  fastify.register(rarityRouter, {
+    prefix: '/rarities'
   })
 
   fastify.register(itemRouter, {
