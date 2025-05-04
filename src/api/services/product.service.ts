@@ -19,7 +19,7 @@ class ProductService {
 
   async create(draft: ProductDraft) {
     try {
-      const result = await this.fastify.db.insert(productTable).values({ ...draft, price: '0.00' }).returning()
+      const result = await this.fastify.db.insert(productTable).values({ ...draft, price: draft.price.toFixed(2) }).returning()
       return result
     } catch (e) {
       if (e.message.startsWith('syntax error'))
