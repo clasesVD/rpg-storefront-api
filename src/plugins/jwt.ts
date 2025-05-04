@@ -4,6 +4,8 @@ import UnauthorizedError from '../api/errors/UnauthorizedError'
 import ForbiddenError from '../api/errors/ForbiddenError'
 import type { ROLE } from '../enums/roles'
 import type { FastifyRequest } from 'fastify'
+import { userTable } from '../db'
+import { eq } from 'drizzle-orm'
 import type { JWTPayload } from '../api/schemas/auth.schema'
 
 export default fp((fastify, options, done) => {
@@ -21,19 +23,28 @@ export default fp((fastify, options, done) => {
   })
 
   fastify.decorate('hasRole', function (roles: ROLE | ROLE[]) {
-    const allowedRoles = Array.isArray(roles) ? roles : [roles]
+    const allowedRoles: ROLE[] = Array.isArray(roles) ? roles : [roles]
 
     return async function (req: FastifyRequest) {
       let payload: JWTPayload
-
       try {
         payload = await req.jwtVerify<JWTPayload>()
       } catch {
-        throw new UnauthorizedError('Not authenticated.')
+        throw new UnauthorizedError('Invalid or missing token.')
       }
 
-      if (!allowedRoles.includes(payload.role))
-        throw new ForbiddenError(`Users with role '${payload.role}' cannot perform this operation.`)
+      const [ user ] = await fastify.db
+        .select()
+        .from(userTable)
+        .where(eq(userTable.id, payload.sub))
+
+      if (!user) {
+        throw new UnauthorizedError('User not found.')
+      }
+
+      if (!allowedRoles.includes(user.role as ROLE)) {
+        throw new ForbiddenError(`User with role '${user.role}' cannot perform this operation.`)
+      }
     }
   })
 
