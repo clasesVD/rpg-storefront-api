@@ -43,7 +43,7 @@ export default fp((fastify, options, done) => {
       }
 
       if (!allowedRoles.includes(user.role as ROLE)) {
-        throw new ForbiddenError(`User with role '${user.role}' cannot perform this operation.`)
+        throw new ForbiddenError('You are not allowed to perform this action.')
       }
     }
   })
