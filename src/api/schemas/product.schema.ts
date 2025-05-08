@@ -5,7 +5,7 @@ export const productSchema = T.Object({
   id: T.String({ format: 'uuid' }),
   itemId: T.String({ format: 'uuid' }),
   rarityId: T.String({ format: 'uuid' }),
-  price: T.Number()
+  price: T.String({ pattern: '[0-9]+([.][0-9]{2})?' })
 })
 
 export const productDraftSchema = T.Omit(productSchema, ['id'])
