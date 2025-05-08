@@ -25,7 +25,7 @@ export const userTable = pgTable('user', {
   name: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }).notNull(),
-  balance: numeric({ precision: 10, scale: 2 }).default('0.00'),
+  balance: numeric({ precision: 10, scale: 2 }).notNull(),
   role: userRoleEnum('role').notNull()
 })
 
@@ -69,6 +69,22 @@ export const cartToProductTable = pgTable('cart_to_product', {
   productId: uuid('product_id').notNull().references(() => productTable.id, { onDelete: 'cascade' }),
   quantity: integer('quantity').notNull().default(1)
 }, (t) => [primaryKey({ columns: [t.cartId, t.productId] })])
+
+export const orderTable = pgTable('order', {
+  id: uuid().defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => userTable.id, { onDelete: 'cascade' })
+})
+
+export const orderToItemTable = pgTable('order_item', {
+  id: uuid().defaultRandom().primaryKey(),
+  orderId: uuid('order_id').notNull().references(() => orderTable.id, { onDelete: 'cascade' }),
+  name: varchar({ length: 255 }).notNull(),
+  description: varchar({ length: 255 }).notNull(),
+  image: varchar({ length: 255 }).notNull(),
+  rarityId: uuid('rarity_id').notNull().references(() => rarityTable.id),
+  price: numeric({ precision: 10, scale: 2 }).notNull(),
+  quantity: integer('quantity').notNull()
+})
 
 ///////////////
 // Relations //
@@ -126,5 +142,24 @@ export const cartToProductRelations = relations(cartToProductTable, ({ one }) =>
   product: one(productTable, {
     fields: [cartToProductTable.productId],
     references: [productTable.id]
+  })
+}))
+
+export const orderRelations = relations(orderTable, ({ one, many }) => ({
+  user: one(userTable, {
+    fields: [orderTable.userId],
+    references: [userTable.id]
+  }),
+  items: many(orderToItemTable)
+}))
+
+export const orderItemRelations = relations(orderToItemTable, ({ one }) => ({
+  order: one(orderTable, {
+    fields: [orderToItemTable.orderId],
+    references: [orderTable.id]
+  }),
+  rarity: one(rarityTable, {
+    fields: [orderToItemTable.rarityId],
+    references: [rarityTable.id]
   })
 }))
