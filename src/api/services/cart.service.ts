@@ -1,6 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import { and, eq, sql } from 'drizzle-orm'
-import { cartTable, cartToProductTable, productTable } from '../../db'
+import {
+  cartTable,
+  cartToProductTable,
+  itemTable,
+  productTable,
+  rarityTable
+} from '../../db'
 import type { CartItem } from '../schemas/cart.schema'
 import BadRequestError from '../errors/BadRequestError'
 import NotFoundError from '../errors/NotFoundError'
@@ -16,33 +22,42 @@ class CartService {
   async getAll() {
     try {
       const carts = await this.fastify.db
-        .select()
+        .select({
+          cart: cartTable,
+          product: productTable,
+          quantity: cartToProductTable.quantity,
+          rarity: rarityTable,
+          item: itemTable
+        })
         .from(cartTable)
+        .leftJoin(
+          cartToProductTable,
+          eq(cartTable.id, cartToProductTable.cartId)
+        )
+        .innerJoin(
+          productTable,
+          eq(cartToProductTable.productId, productTable.id)
+        )
+        .innerJoin(
+          itemTable,
+          eq(productTable.itemId, itemTable.id)
+        )
+        .innerJoin(
+          rarityTable,
+          eq(productTable.rarityId, rarityTable.id)
+        )
         .execute()
 
-      const cartsWithProducts = await Promise.all(
-        carts.map(async (cart) => {
-          const products = await this.fastify.db
-            .select({
-              product: productTable,
-              quantity: cartToProductTable.quantity
-            })
-            .from(cartToProductTable)
-            .where(eq(cartToProductTable.cartId, cart.id))
-            .innerJoin(
-              productTable,
-              eq(cartToProductTable.productId, productTable.id)
-            )
-            .execute()
+      const result = carts.reduce((acc, { cart, ...cartItem }) => {
+        const existingCart = acc.find((c) => c.id === cart.id)
 
-          return {
-            ...cart,
-            products
-          }
-        })
-      )
+        if (existingCart) existingCart.products.push(cartItem)
+        else acc.push({ ...cart, products: [cartItem] })
 
-      return cartsWithProducts
+        return acc
+      }, [])
+
+      return result
     } catch (error) {
       throw new InternalServerError('Failed to get all carts', error)
     }
@@ -54,7 +69,9 @@ class CartService {
         .select({
           cart: cartTable,
           product: productTable,
-          quantity: cartToProductTable.quantity
+          quantity: cartToProductTable.quantity,
+          rarity: rarityTable,
+          item: itemTable
         })
         .from(cartTable)
         .leftJoin(
@@ -63,7 +80,15 @@ class CartService {
         )
         .innerJoin(
           productTable,
-          eq(cartToProductTable.productId, productTable)
+          eq(cartToProductTable.productId, productTable.id)
+        )
+        .innerJoin(
+          itemTable,
+          eq(productTable.itemId, itemTable.id)
+        )
+        .innerJoin(
+          rarityTable,
+          eq(productTable.rarityId, rarityTable.id)
         )
         .where(eq(cartTable.id, cartId))
         .execute()
@@ -119,7 +144,7 @@ class CartService {
 
   async create(userId: string) {
     try {
-      const [ existingCart ] = await this.fastify.db
+      const [existingCart] = await this.fastify.db
         .select()
         .from(cartTable)
         .where(eq(cartTable.userId, userId))
@@ -127,7 +152,7 @@ class CartService {
 
       if (existingCart) return existingCart
 
-      const [ newCart ] = await this.fastify.db
+      const [newCart] = await this.fastify.db
         .insert(cartTable)
         .values({ userId: userId })
         .returning()
@@ -149,7 +174,7 @@ class CartService {
     try {
       await this.getById(cartId)
 
-      const [ deletedCart ] = await this.fastify.db
+      const [deletedCart] = await this.fastify.db
         .delete(cartTable)
         .where(eq(cartTable.id, cartId))
         .returning()
@@ -170,7 +195,7 @@ class CartService {
 
       await this.getById(cartId)
 
-      const [ product ] = await this.fastify.db
+      const [product] = await this.fastify.db
         .select()
         .from(productTable)
         .where(eq(productTable.id, cartItem.productId))

@@ -21,7 +21,7 @@ class UserService {
   async create(draft: UserDraft) {
     try {
       const password = hashPassword(draft.password)
-      const result = await this.fastify.db.insert(userTable).values({ ...draft, password }).returning()
+      const result = await this.fastify.db.insert(userTable).values({ ...draft, password, balance: '0.00' }).returning()
       return result
     } catch (e) {
       if (e.message.startsWith('syntax error'))
