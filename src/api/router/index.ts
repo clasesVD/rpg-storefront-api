@@ -8,6 +8,7 @@ import authRouter from './auth.router'
 import meRouter from './me.router'
 import cartRouter from './cart.router'
 import rarityRouter from './rarity.router'
+import orderRouter from './order.router'
 
 export default fp((fastify, _, done) => {
   fastify.route({
@@ -49,6 +50,10 @@ export default fp((fastify, _, done) => {
 
   fastify.register(cartRouter, {
     prefix: '/carts'
+  })
+
+  fastify.register(orderRouter, {
+    prefix: '/orders'
   })
 
   done()

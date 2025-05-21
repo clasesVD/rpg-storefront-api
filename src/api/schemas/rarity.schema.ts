@@ -1,6 +1,6 @@
 import { Type as T } from '@sinclair/typebox'
 
-const raritySchema = T.Object({
+export const raritySchema = T.Object({
   id: T.String({ format: 'uuid' }),
   name: T.String(),
   color: T.String()
