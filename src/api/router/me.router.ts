@@ -15,10 +15,7 @@ export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
   const cartController = new CartController(fastify)
 
-  fastify.addHook('onRequest', async (req, res) => {
-    await fastify.authenticate(req, res)
-    await fastify.hasRole([ ROLE.ADMIN, ROLE.CUSTOMER ])(req, res)
-  })
+  fastify.addHook('onRequest', fastify.hasPermission([ROLE.ADMIN, ROLE.CUSTOMER]))
 
   fastify.route({
     url: '/',

@@ -14,15 +14,7 @@ export default fp((fastify, options, done) => {
     ...options
   })
 
-  fastify.decorate('authenticate', async function (req) {
-    try {
-      await req.jwtVerify()
-    } catch (e) {
-      throw new UnauthorizedError(e)
-    }
-  })
-
-  fastify.decorate('hasRole', function (roles: ROLE | ROLE[]) {
+  fastify.decorate('hasPermission', function (roles: ROLE | ROLE[]) {
     const allowedRoles: ROLE[] = Array.isArray(roles) ? roles : [roles]
 
     return async function (req: FastifyRequest) {
@@ -39,7 +31,7 @@ export default fp((fastify, options, done) => {
         .where(eq(userTable.id, payload.sub))
 
       if (!user) {
-        throw new UnauthorizedError('User not found.')
+        throw new UnauthorizedError('Invalid or expired token.')
       }
 
       if (!allowedRoles.includes(user.role as ROLE)) {

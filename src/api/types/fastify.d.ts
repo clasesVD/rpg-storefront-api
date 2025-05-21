@@ -2,8 +2,7 @@ import 'fastify'
 
 declare module 'fastify' {
   interface FastifyInstance {
-    authenticate: (req: FastifyRequest, res: FastifyReply) => Promise<void>
-    hasRole: (role: ROLES) => (req: FastifyRequest, res: FastifyReply) => Promise<void>
+    hasPermission: (role: ROLES) => (req: FastifyRequest, res: FastifyReply) => Promise<void>
   }
 
   interface FastifyRequest {
