@@ -56,7 +56,7 @@ export const productTable = pgTable('product', {
 
 export const itemToCategoryTable = pgTable('item_to_category', {
   itemId: uuid('item_id').notNull().references(() => itemTable.id, { onDelete: 'cascade' }),
-  categoryId: uuid('category_id').references(() => categoryTable.id, { onDelete: 'cascade' })
+  categoryId: uuid('category_id').notNull().references(() => categoryTable.id, { onDelete: 'cascade' })
 }, (t) => [primaryKey({ columns: [t.itemId, t.categoryId] })])
 
 export const cartTable = pgTable('cart', {

@@ -6,7 +6,10 @@ export const itemSchema = T.Object({
   name: T.String(),
   description: T.String(),
   image: T.String(),
-  categoryId: T.Array(T.String({ format: 'uuid' }))
+  categories: T.Array(T.Object({
+    id: T.String({ format: 'uuid' }),
+    name: T.String()
+  }), { default: [] })
 })
 
 const itemDraftSchema = T.Omit(itemSchema, ['id'])
