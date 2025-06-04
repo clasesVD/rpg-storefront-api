@@ -19,8 +19,7 @@ class CartController {
   }
 
   async getAll() {
-    const result = await this.cartService.getAll()
-    return result
+    return this.cartService.getAll()
   }
 
   async getById(req: CartGetByIdRequest) {
