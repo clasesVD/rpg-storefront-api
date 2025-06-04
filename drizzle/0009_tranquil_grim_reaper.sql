@@ -1,0 +1,1 @@
+ALTER TABLE "item_to_category" ALTER COLUMN "category_id" SET NOT NULL;
