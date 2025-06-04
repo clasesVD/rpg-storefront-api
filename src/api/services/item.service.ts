@@ -35,8 +35,7 @@ class ItemService {
     return result
   }
 
-  async create(draft: ItemDraft) {
-    const { categories, ...itemDraft } = draft
+  async create({ categories, ...itemDraft }: ItemDraft) {
 
     if (!categories.length)
       throw new BadRequestError('At least one category is required.')
@@ -82,10 +81,8 @@ class ItemService {
     }
   }
 
-  async patchById(id: string, payload: ItemUpdate) {
+  async patchById(id: string, { categories, ...itemData }: ItemUpdate) {
     await this.getById(id)
-
-    const { categories, ...itemData } = payload
 
     try {
       if (Object.keys(itemData).length > 0) {
