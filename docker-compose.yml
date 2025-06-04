@@ -1,10 +1,7 @@
-name: rpg-storefront-api
-
 services:
   db:
     image: postgres:17.2-alpine3.21
     restart: always
-    # set shared memory limit when using docker-compose
     shm_size: 128mb
     volumes:
       - ./data:/var/lib/postgresql/data
@@ -12,9 +9,22 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: testdb
+      POSTGRES_USER: postgres
+      POSTGRES_DB: rpg_storefront
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+
+  api:
+    build: .
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - db
