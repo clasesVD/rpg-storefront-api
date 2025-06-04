@@ -22,9 +22,12 @@ services:
     build: .
     ports:
       - 3000:3000
-    env_file:
-      - .env
-    volumes:
-      - .:/app
+    environment:
+      - PORT: 3000
+      - DATABASE_URL: postgres://postgres:testdb@db:5432/rpg_storefront
+      - NODE_ENV: production
+      - LOG_LEVEL: error
+      - JWT_SECRET: rpg420asd123
+      - HOST: http://127.0.0.1
     depends_on:
       - db
