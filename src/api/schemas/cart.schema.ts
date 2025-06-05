@@ -2,7 +2,7 @@ import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyRequest } from 'fastify'
 import { productPublicSchema } from './product.schema'
 import type { JWTPayload } from './auth.schema'
-import { itemSchema } from './item.schema'
+import { itemWithoutCategorySchema } from './item.schema'
 import { raritySchema } from './rarity.schema'
 
 const cartSchema = T.Object({
@@ -12,7 +12,7 @@ const cartSchema = T.Object({
     T.Object({
       product: productPublicSchema,
       quantity: T.Integer({ minimum: 1 }),
-      item: itemSchema,
+      item: itemWithoutCategorySchema,
       rarity: raritySchema
     }), { default: [] }
   )
