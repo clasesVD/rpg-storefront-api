@@ -25,7 +25,7 @@ class CartService {
         .select({
           cart: cartTable,
           product: productTable,
-          quantity: cartToProductTable.quantity,
+          quantity: sql<number>`COALESCE(${cartToProductTable.quantity}, 0)`,
           rarity: rarityTable,
           item: itemTable
         })
@@ -34,15 +34,15 @@ class CartService {
           cartToProductTable,
           eq(cartTable.id, cartToProductTable.cartId)
         )
-        .innerJoin(
+        .leftJoin(
           productTable,
           eq(cartToProductTable.productId, productTable.id)
         )
-        .innerJoin(
+        .leftJoin(
           itemTable,
           eq(productTable.itemId, itemTable.id)
         )
-        .innerJoin(
+        .leftJoin(
           rarityTable,
           eq(productTable.rarityId, rarityTable.id)
         )
@@ -69,7 +69,7 @@ class CartService {
         .select({
           cart: cartTable,
           product: productTable,
-          quantity: cartToProductTable.quantity,
+          quantity: sql<number>`COALESCE(${cartToProductTable.quantity}, 0)`,
           rarity: rarityTable,
           item: itemTable
         })
@@ -78,15 +78,15 @@ class CartService {
           cartToProductTable,
           eq(cartTable.id, cartToProductTable.cartId)
         )
-        .innerJoin(
+        .leftJoin(
           productTable,
           eq(cartToProductTable.productId, productTable.id)
         )
-        .innerJoin(
+        .leftJoin(
           itemTable,
           eq(productTable.itemId, itemTable.id)
         )
-        .innerJoin(
+        .leftJoin(
           rarityTable,
           eq(productTable.rarityId, rarityTable.id)
         )
@@ -114,16 +114,26 @@ class CartService {
         .select({
           cart: cartTable,
           product: productTable,
-          quantity: sql<number>`COALESCE(${cartToProductTable.quantity}, 0)`
+          quantity: sql<number>`COALESCE(${cartToProductTable.quantity}, 0)`,
+          rarity: rarityTable,
+          item: itemTable
         })
         .from(cartTable)
         .leftJoin(
           cartToProductTable,
           eq(cartTable.id, cartToProductTable.cartId)
         )
-        .innerJoin(
+        .leftJoin(
           productTable,
           eq(cartToProductTable.productId, productTable.id)
+        )
+        .leftJoin(
+          itemTable,
+          eq(productTable.itemId, itemTable.id)
+        )
+        .leftJoin(
+          rarityTable,
+          eq(productTable.rarityId, rarityTable.id)
         )
         .where(eq(cartTable.userId, userId))
         .execute()
