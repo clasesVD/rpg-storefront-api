@@ -16,6 +16,7 @@ const itemDraftSchema = T.Omit(itemSchema, ['id'])
 const itemPublicSchema = itemSchema
 const itemParamsSchema = T.Pick(itemSchema, ['id'])
 const itemUpdateSchema = T.Partial(itemDraftSchema)
+export const itemWithoutCategorySchema = T.Omit(itemSchema, ['categories'])
 
 export const itemGetAllSchema = {
   tags: ['Item'],
@@ -65,6 +66,7 @@ export type ItemDraft = Static<typeof itemDraftSchema>
 export type ItemPublic = Static<typeof itemPublicSchema>
 export type ItemParams = Static<typeof itemParamsSchema>
 export type ItemUpdate = Static<typeof itemUpdateSchema>
+export type ItemWithoutCategory = Static<typeof itemWithoutCategorySchema>
 export type ItemGetAll = FastifyReply<{ Body: Item[] }>
 export type ItemCreateRequest = FastifyRequest<{ Body: ItemDraft }>
 export type ItemParamsRequest = FastifyRequest<{ Params: ItemParams }>
