@@ -13,13 +13,21 @@
     "esModuleInterop": true, // Enables interoperability with CommonJS modules
     "forceConsistentCasingInFileNames": true, // Enforces consistent casing in file names
     "outDir": "./dist", // Output directory for compiled files
-    "rootDir": "./src" // Root directory for source files
+    "rootDirs": [
+      "./src",
+      "./__test__"
+    ], // Root directory for source files
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/api/types"
+    ], // Root directory for type definitions
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "__test__"
   ]
 }
