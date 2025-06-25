@@ -1,5 +1,6 @@
 import { Type as T, type Static } from '@sinclair/typebox'
 import type { FastifyRequest } from 'fastify'
+import type { JWTPayload } from './auth.schema'
 
 const orderItemSchema = T.Object({
   name: T.String(),
@@ -21,6 +22,7 @@ export const orderDraftSchema = T.Object({
   cartId: T.String({ format: 'uuid' })
 })
 export const orderParamsSchema = T.Pick(orderSchema, ['id'])
+export const orderUserParamsSchema = T.Pick(orderSchema, ['userId'])
 
 export const orderGetAllSchema = {
   tags: ['Order'],
@@ -57,8 +59,17 @@ export const orderDeleteSchema = {
   }
 }
 
+export const meCheckoutSchema = {
+  tags: ['Me'],
+  response: {
+    200: orderSchema
+  }
+}
+
 export type OrderDraft = Static<typeof orderDraftSchema>
 export type OrderParams = Static<typeof orderParamsSchema>
+export type OrderUserParams = Static<typeof orderUserParamsSchema>
 export type OrderCreateRequest = FastifyRequest<{ Body: OrderDraft }>
 export type OrderGetByIdRequest = FastifyRequest<{ Params: OrderParams }>
 export type OrderDeleteRequest = FastifyRequest<{ Params: OrderParams }>
+export type OrderMePayloadRequest = FastifyRequest & { user: JWTPayload }
