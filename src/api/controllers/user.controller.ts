@@ -12,14 +12,17 @@ import type {
 } from '../schemas/user.schema'
 import { verifyPassword } from '../../helpers/crypto'
 import BadRequestError from '../errors/BadRequestError'
+import OrderService from '../services/order.service'
 
 class UserController {
   userService: UserService
   cartService: CartService
+  orderService: OrderService
 
   constructor(fastify: FastifyInstance) {
     this.userService = new UserService(fastify)
     this.cartService = new CartService(fastify)
+    this.orderService = new OrderService(fastify)
   }
 
   async getAll() {
@@ -47,12 +50,12 @@ class UserController {
     const userId = req.user.sub
     const user = await this.userService.getById(userId)
     const cart = await this.cartService.getByUserId(userId).catch(() => null)
-    //const orders = await this.orderService.getById(userId)
+    const orders = await this.orderService.getByUserId(userId)
 
     return {
       user,
-      cart
-      //orders
+      cart,
+      orders
     }
   }
 
