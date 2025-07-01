@@ -6,14 +6,19 @@ import {
   meChangePasswordSchema,
   meAddProductSchema,
   meChangeProductQuantitySchema,
-  meDeleteCartSchema
+  meDeleteCartSchema,
+  meGetOrdersSchema,
+  meGetOrderByIdSchema
 } from '../schemas/user.schema'
 import CartController from '../controllers/cart.controller'
+import OrderController from '../controllers/order.controller'
 import { ROLE } from '../../enums/roles'
+import { meCheckoutSchema } from '../schemas/orders.schema'
 
 export default async (fastify: FastifyInstance) => {
   const userController = new UserController(fastify)
   const cartController = new CartController(fastify)
+  const orderController = new OrderController(fastify)
 
   fastify.addHook('onRequest', fastify.hasPermission([ROLE.ADMIN, ROLE.CUSTOMER]))
 
@@ -57,5 +62,26 @@ export default async (fastify: FastifyInstance) => {
     method: 'DELETE',
     schema: meDeleteCartSchema,
     handler: userController.deleteMeCart.bind(userController)
+  })
+
+  fastify.route({
+    url: '/orders',
+    method: 'GET',
+    schema: meGetOrdersSchema,
+    handler: orderController.getByUserId.bind(orderController)
+  })
+
+  fastify.route({
+    url: '/orders/:id',
+    method: 'GET',
+    schema: meGetOrderByIdSchema,
+    handler: orderController.getById.bind(orderController)
+  })
+
+  fastify.route({
+    url: '/checkout',
+    method: 'POST',
+    schema: meCheckoutSchema,
+    handler: orderController.checkout.bind(orderController)
   })
 }

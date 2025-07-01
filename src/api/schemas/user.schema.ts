@@ -8,6 +8,7 @@ import {
   cartProductUpdateSchema,
   cartPublicSchema
 } from './cart.schema'
+import { orderPublicSchema } from './orders.schema'
 
 export const userSchema = T.Object({
   id: T.String({ format: 'uuid' }),
@@ -136,6 +137,20 @@ export const meDeleteCartSchema = {
     200: T.Object({
       message: T.String()
     })
+  }
+}
+
+export const meGetOrdersSchema = {
+  tags: ['Me'],
+  response: {
+    200: orderPublicSchema
+  }
+}
+
+export const meGetOrderByIdSchema = {
+  tags: ['Me'],
+  response: {
+    200: orderPublicSchema
   }
 }
 

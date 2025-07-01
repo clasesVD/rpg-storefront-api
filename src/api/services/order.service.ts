@@ -76,6 +76,36 @@ class OrderService {
     }
   }
 
+  async getByUserId(userId: string) {
+    try {
+      const result = await this.fastify.db
+        .select({
+          order: orderTable,
+          items: orderToItemTable
+        })
+        .from(orderTable)
+        .innerJoin(
+          orderToItemTable,
+          eq(orderTable.id, orderToItemTable.orderId)
+        )
+        .where(eq(orderTable.userId, userId))
+        .execute()
+
+      if (!result.length) {
+        throw new NotFoundError(`Orders of user with ID: ${userId} do not exist.`)
+      }
+
+      return {
+        ...result[0].order,
+        products: result.map(({ order: _, items }) => items)
+      }
+
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error
+      throw new InternalServerError(`Failed to get orders of user with ID: ${userId}`, error)
+    }
+  }
+
   async create(cart: Cart) {
     const [currentUser] = await this.fastify.db
       .select()
