@@ -10,9 +10,11 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
-    '^.+\\.js$': 'babel-jest'
+    '^.+\\.js$': 'ts-jest'
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(brace-expansion|balanced-match|glob|@fastify|fastify)/)'
-  ]
+  ],
+  globalTeardown: '<rootDir>/__test__/utils/globalTeardown.ts',
+  maxWorkers: 1
 }

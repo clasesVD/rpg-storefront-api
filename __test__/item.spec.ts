@@ -1,25 +1,21 @@
-import { Category } from '../src/api/schemas/category.schema'
-import { Item } from '../src/api/schemas/item.schema'
+import type { Category } from '../src/api/schemas/category.schema'
+import type { Item } from '../src/api/schemas/item.schema'
 import { categoryTable, itemTable } from '../src/db'
-import { getAllFrom, getOneFrom} from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
+let ctx: TestContext
 let itemMock: Item
-let testCategory: Category
+let category: Category
 let items: Item[]
-let item: Item
 
 describe('Items Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    testCategory = await getOneFrom(ctx.app, categoryTable)
-    items = await getAllFrom(ctx.app, itemTable)
-    item = await getOneFrom(ctx.app, itemTable)
-  })
-
-  afterAll(async () => {
-    await ctx.close()
+    ctx = await new TestContextBuilder()
+      .withAdmin()
+      .withCustomer()
+      .build()
+    category = await ctx.db.getOneRecordFrom(categoryTable)
+    items = await ctx.db.getAllRecordsFrom(itemTable)
   })
 
   describe('/items', () => {
@@ -29,7 +25,7 @@ describe('Items Routes', () => {
           method: 'GET',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -41,7 +37,7 @@ describe('Items Routes', () => {
           method: 'GET',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 
@@ -76,13 +72,13 @@ describe('Items Routes', () => {
           method: 'POST',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: 'Test Item',
             description: 'This is a test item',
             image: 'https://example.com/test-item.jpg',
-            categories: [testCategory]
+            categories: [category]
           }
         })
 
@@ -101,7 +97,7 @@ describe('Items Routes', () => {
           method: 'POST',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: 'Test Item',
@@ -111,13 +107,13 @@ describe('Items Routes', () => {
           }
         })
 
-      expect(result.json()).toEqual({
-        code: 400,
-        title: 'Bad Request',
-        type: 'BadRequestError',
-        level: 'minor',
-        message: 'At least one category is required.'
-      })
+        expect(result.json()).toEqual({
+          code: 400,
+          title: 'Bad Request',
+          type: 'BadRequestError',
+          level: 'minor',
+          message: 'At least one category is required.'
+        })
       })
 
       it('should throw an error if the user is not admin', async () => {
@@ -125,13 +121,13 @@ describe('Items Routes', () => {
           method: 'POST',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             name: 'Test Item',
             description: 'This is a test item',
             image: 'https://example.com/test-item.jpg',
-            categories: [testCategory]
+            categories: [category]
           }
         })
 
@@ -149,13 +145,13 @@ describe('Items Routes', () => {
           method: 'POST',
           url: '/items',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: null,
             description: 'This is a test item',
             image: 'https://example.com/test-item.jpg',
-            categories: [testCategory]
+            categories: [category]
           }
         })
 
@@ -175,13 +171,13 @@ describe('Items Routes', () => {
       it('should return an item by id', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/items/${item.id}`,
+          url: `/items/${items[0].id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
-        expect(result.json()).toEqual(item)
+        expect(result.json()).toEqual(items[0])
       })
     })
 
@@ -191,7 +187,7 @@ describe('Items Routes', () => {
           method: 'DELETE',
           url: `/items/${itemMock.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 

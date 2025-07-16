@@ -1,11 +1,10 @@
-import { Item } from '../src/api/schemas/item.schema'
-import { Product } from '../src/api/schemas/product.schema'
-import { Rarity } from '../src/api/schemas/rarity.schema'
+import type { Item } from '../src/api/schemas/item.schema'
+import type { Product } from '../src/api/schemas/product.schema'
+import type { Rarity } from '../src/api/schemas/rarity.schema'
 import { productTable, rarityTable, itemTable } from '../src/db'
-import { getAllFrom, getOneFrom } from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
+let ctx: TestContext
 let products: Product[]
 let mockProduct: Product
 let rarity: Rarity
@@ -13,14 +12,13 @@ let item: Item
 
 describe('Products Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    products = await getAllFrom(ctx.app, productTable)
-    rarity = await getOneFrom(ctx.app, rarityTable)
-    item = await getOneFrom(ctx.app, itemTable)
-  })
-
-  afterAll(async () => {
-    await ctx.close()
+    ctx = await new TestContextBuilder()
+      .withAdmin()
+      .withCustomer()
+      .build()
+    products = await ctx.db.getAllRecordsFrom(productTable)
+    rarity = await ctx.db.getOneRecordFrom(rarityTable)
+    item = await ctx.db.getOneRecordFrom(itemTable)
   })
 
   describe('/products', () => {
@@ -30,7 +28,7 @@ describe('Products Routes', () => {
           method: 'GET',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -42,7 +40,7 @@ describe('Products Routes', () => {
           method: 'GET',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 
@@ -62,7 +60,7 @@ describe('Products Routes', () => {
           method: 'POST',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             itemId: item.id,
@@ -81,7 +79,7 @@ describe('Products Routes', () => {
           method: 'POST',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             itemId: '',
@@ -104,7 +102,7 @@ describe('Products Routes', () => {
           method: 'POST',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             itemId: item.id,
@@ -127,7 +125,7 @@ describe('Products Routes', () => {
           method: 'POST',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             itemId: item.id,
@@ -150,7 +148,7 @@ describe('Products Routes', () => {
           method: 'POST',
           url: '/products',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             itemId: item.id,
@@ -177,7 +175,7 @@ describe('Products Routes', () => {
           method: 'GET',
           url: `/products/${products[0].id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -187,9 +185,9 @@ describe('Products Routes', () => {
       it('should throw an error if the product does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/products/${ctx.idMock}`,
+          url: `/products/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -198,7 +196,7 @@ describe('Products Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Product with ID: ${ctx.idMock} does not exist.`
+          message: `Product with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
@@ -207,7 +205,7 @@ describe('Products Routes', () => {
           method: 'GET',
           url: `/products/${products[0].id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 
@@ -225,9 +223,9 @@ describe('Products Routes', () => {
       it('should throw an error if the product does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/products/${ctx.idMock}`,
+          url: `/products/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             price: 500
@@ -239,7 +237,7 @@ describe('Products Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Product with ID: ${ctx.idMock} does not exist.`
+          message: `Product with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
@@ -248,7 +246,7 @@ describe('Products Routes', () => {
           method: 'PATCH',
           url: `/products/${mockProduct.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             price: 1000
@@ -266,7 +264,7 @@ describe('Products Routes', () => {
           method: 'PATCH',
           url: `/products/${products[0].id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             price: 500
@@ -287,9 +285,9 @@ describe('Products Routes', () => {
       it('should throw an error if the product does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/products/${ctx.idMock}`,
+          url: `/products/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -298,7 +296,7 @@ describe('Products Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Product with ID: ${ctx.idMock} does not exist.`
+          message: `Product with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
@@ -307,7 +305,7 @@ describe('Products Routes', () => {
           method: 'DELETE',
           url: `/products/${mockProduct.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 

@@ -1,18 +1,14 @@
-import { buildApp } from '../src/app'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 
-const app = buildApp()
+let ctx: TestContext
+
+beforeAll(async () => {
+  ctx = await new TestContextBuilder().build()
+})
 
 describe('/health', () => {
-  beforeAll(async () => {
-    await app.ready()
-  })
-
-  afterAll(async () => {
-    await app.close()
-  })
-
   it('should return status healthy', async () => {
-    const response = await app.inject({
+    const response = await ctx.app.inject({
       method: 'GET',
       url: '/health'
     })

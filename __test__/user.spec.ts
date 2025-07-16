@@ -1,19 +1,39 @@
-import { User } from '../src/api/schemas/user.schema'
+import type { User } from '../src/api/schemas/user.schema'
 import { userTable } from '../src/db'
-import { getAllFrom } from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
+import { eq } from 'drizzle-orm'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
+let ctx: TestContext
 let users: User[]
+let testUser: User
+
+const testUserPayload = {
+  name: 'John Max Doe',
+  email: 'john-max@example.com',
+  password: 'password123',
+  role: 'C'
+}
 
 describe('Users Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    users = await getAllFrom(ctx.app, userTable)
+    ctx = await new TestContextBuilder().withAdmin().withCustomer().build()
+
+    const register = await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: testUserPayload
+    })
+
+    testUser = register.json()
+
+    users = await ctx.db.getAllRecordsFrom(userTable)
   })
 
   afterAll(async () => {
-    await ctx.close()
+    await ctx.app.db
+      .delete(userTable)
+      .where(eq(userTable.email, testUserPayload.email))
+      .execute()
   })
 
   describe('/users', () => {
@@ -23,12 +43,11 @@ describe('Users Routes', () => {
           method: 'GET',
           url: '/users',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
         expect(result.json()).toEqual(users.map(({ password, ...user }) => user))
-
       })
     })
   })
@@ -38,21 +57,21 @@ describe('Users Routes', () => {
       it('should return a user by id', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/users/${ctx.admin.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
-        expect(result.json()).toEqual({ ...ctx.admin, password: undefined })
+        expect(result.json()).toEqual({ ...testUser, password: undefined, token: undefined })
       })
 
       it('should throw an error if the user does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/users/${ctx.idMock}`,
+          url: `/users/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -61,14 +80,14 @@ describe('Users Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `User with ID:${ctx.idMock} does not exist.`
+          message: `User with ID:${ctx.mocks.id} does not exist.`
         })
       })
 
       it('should throw an error if the user is not authenticated', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/users/${ctx.customer.id}`
+          url: `/users/${testUser.id}`
         })
 
         expect(result.json()).toEqual({
@@ -83,9 +102,9 @@ describe('Users Routes', () => {
       it('should throw an error if the user is not admin', async () => {
         const result = await ctx.app.inject({
           method: 'GET',
-          url: `/users/${ctx.customer.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 
@@ -103,27 +122,29 @@ describe('Users Routes', () => {
       it('should update a user by id', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/users/${ctx.admin.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
-            name: 'John Max Doe'
+            name: 'Updated Name'
           }
         })
 
-        expect(result.json()).toEqual({ ...ctx.admin, name: 'John Max Doe', password: undefined })
+        expect(result.json()).toEqual({ ...testUser, name: 'Updated Name', password: undefined, token: undefined })
+
+        testUser = { ...testUser, name: 'Updated Name' }
       })
 
       it('should throw an error if the user does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/users/${ctx.idMock}`,
+          url: `/users/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
-            name: 'John Max Doe'
+            name: 'Whatever'
           }
         })
 
@@ -132,16 +153,16 @@ describe('Users Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `User with ID:${ctx.idMock} does not exist.`
+          message: `User with ID:${ctx.mocks.id} does not exist.`
         })
       })
 
       it('should throw an error if the user is not authenticated', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/users/${ctx.customer.id}`,
+          url: `/users/${testUser.id}`,
           payload: {
-            name: 'John Max Doe'
+            name: 'Another'
           }
         })
 
@@ -157,12 +178,12 @@ describe('Users Routes', () => {
       it('should throw an error if the user is not admin', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/users/${ctx.customer.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
-            name: 'John Max Doe'
+            name: 'Another'
           }
         })
 
@@ -178,12 +199,12 @@ describe('Users Routes', () => {
       it('should throw an error if the fields are invalid', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/users/${ctx.admin.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
-            bob: 'bob is here'
+            bob: 'bob'
           }
         })
 
@@ -201,9 +222,9 @@ describe('Users Routes', () => {
       it('should throw an error if the user does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/users/${ctx.idMock}`,
+          url: `/users/${ctx.mocks.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -212,26 +233,26 @@ describe('Users Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `User with ID:${ctx.idMock} does not exist.`
+          message: `User with ID:${ctx.mocks.id} does not exist.`
         })
       })
 
       it('should delete a user by id', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/users/${ctx.admin.id}`,
+          url: `/users/${testUser.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
-        expect(result.json()).toEqual({ ...ctx.admin, name: 'John Max Doe' })
+        expect(result.json()).toEqual({ ...testUser, token: undefined })
       })
 
       it('should throw an error if the user is not authenticated', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/users/${ctx.customer.id}`
+          url: `/users/${ctx.users.customer.id}`
         })
 
         expect(result.json()).toEqual({
@@ -246,9 +267,9 @@ describe('Users Routes', () => {
       it('should throw an error if the user is not admin', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/users/${ctx.customer.id}`,
+          url: `/users/${ctx.users.customer.id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 

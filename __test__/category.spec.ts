@@ -1,20 +1,19 @@
-import { Category } from '../src/api/schemas/category.schema'
+import type { Category } from '../src/api/schemas/category.schema'
 import { categoryTable } from '../src/db'
-import { getAllFrom } from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
+let ctx: TestContext
 let categories: Category[]
 let mockCategory: Category
 
 describe('Categories Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    categories = await getAllFrom(ctx.app, categoryTable)
-  })
+    ctx = await new TestContextBuilder()
+      .withAdmin()
+      .withCustomer()
+      .build()
 
-  afterAll(async () => {
-    await ctx.close()
+    categories = await ctx.db.getAllRecordsFrom(categoryTable)
   })
 
   describe('/categories', () => {
@@ -24,7 +23,7 @@ describe('Categories Routes', () => {
           method: 'GET',
           url: '/categories',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -38,7 +37,7 @@ describe('Categories Routes', () => {
           method: 'POST',
           url: '/categories',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: 'Mock Category'
@@ -55,7 +54,7 @@ describe('Categories Routes', () => {
           method: 'POST',
           url: '/categories',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: ''
@@ -76,7 +75,7 @@ describe('Categories Routes', () => {
           method: 'POST',
           url: '/categories',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             name: categories[0].name
@@ -97,7 +96,7 @@ describe('Categories Routes', () => {
           method: 'POST',
           url: '/categories',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             name: 'Mock Category'
@@ -122,7 +121,7 @@ describe('Categories Routes', () => {
           method: 'GET',
           url: `/categories/${categories[0].id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -136,7 +135,7 @@ describe('Categories Routes', () => {
           method: 'DELETE',
           url: `/categories/${mockCategory.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 

@@ -1,41 +1,48 @@
-import { Cart } from './../src/api/schemas/cart.schema'
-import { cartTable, rarityTable, productTable } from '../src/db'
-import { getAllFrom, getOneFrom } from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
-import { Product } from '../src/api/schemas/product.schema'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
+import type { Cart } from './../src/api/schemas/cart.schema'
+import { cartTable, productTable } from '../src/db'
+import type { Product } from '../src/api/schemas/product.schema'
+import { eq } from 'drizzle-orm'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
-let carts: Cart[]
-let mockCart: Cart
+let ctx: TestContext
+let adminCart: Cart
 let customerCart: Cart
 let product: Product
 
 describe('Cart Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    carts = await getAllFrom(ctx.app, cartTable)
+    ctx = await new TestContextBuilder()
+      .withAdmin()
+      .withCustomer()
+      .build()
+
     await ctx.app.inject({
       method: 'POST',
       url: '/carts',
       headers: {
-        authorization: `Bearer ${ctx.adminToken}`
+        authorization: `Bearer ${ctx.users.admin.token}`
       },
       payload: {
-        userId: ctx.customer.id
+        userId: ctx.users.customer.id
       }
     })
+
     customerCart = (await ctx.app.inject({
       method: 'GET',
-      url: `/carts/${ctx.customer.id}`,
+      url: `/carts/${ctx.users.customer.id}`,
       headers: {
-        authorization: `Bearer ${ctx.customerToken}`
+        authorization: `Bearer ${ctx.users.customer.token}`
       }
     })).json()
-    product = await getOneFrom(ctx.app, productTable)
+
+    product = await ctx.db.getOneRecordFrom(productTable)
   })
 
   afterAll(async () => {
-    await ctx.close()
+    await ctx.app.db
+      .delete(cartTable)
+      .where(eq(cartTable.id, adminCart.id))
+      .execute()
   })
 
   describe('/carts', () => {
@@ -45,16 +52,16 @@ describe('Cart Routes', () => {
           method: 'POST',
           url: '/carts',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
-            userId: ctx.admin.id
+            userId: ctx.users.admin.id
           }
         })
 
-        mockCart = result.json()
+        adminCart = result.json()
 
-        expect(result.json()).toEqual(mockCart)
+        expect(result.json()).toEqual(adminCart)
       })
 
       it('should throw an error when there\'s no user provided', async () => {
@@ -62,7 +69,7 @@ describe('Cart Routes', () => {
           method: 'POST',
           url: '/carts',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             userId: ''
@@ -83,10 +90,10 @@ describe('Cart Routes', () => {
           method: 'POST',
           url: '/carts',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
-            userId: ctx.customer.id
+            userId: ctx.users.customer.id
           }
         })
 
@@ -104,7 +111,7 @@ describe('Cart Routes', () => {
           method: 'POST',
           url: '/carts',
           payload: {
-            userId: ctx.customer.id
+            userId: ctx.users.customer.id
           }
         })
 
@@ -120,11 +127,12 @@ describe('Cart Routes', () => {
 
     describe('/GET', () => {
       it('should return an array of carts', async () => {
+        const carts = await ctx.db.getAllRecordsFrom(cartTable)
         const result = await ctx.app.inject({
           method: 'GET',
           url: '/carts',
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
@@ -136,7 +144,7 @@ describe('Cart Routes', () => {
           method: 'GET',
           url: '/carts',
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           }
         })
 
@@ -171,13 +179,13 @@ describe('Cart Routes', () => {
       it('should delete a cart', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/carts/${mockCart.id}`,
+          url: `/carts/${customerCart.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
-        expect(result.json()).toEqual(mockCart)
+        expect(result.json()).toEqual(customerCart)
       })
     })
   })
@@ -187,9 +195,9 @@ describe('Cart Routes', () => {
       it('should add a product to a cart', async () => {
         const result = await ctx.app.inject({
           method: 'POST',
-          url: `/carts/${mockCart.id}/products`,
+          url: `/carts/${adminCart.id}/products`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             productId: product.id,
@@ -198,7 +206,7 @@ describe('Cart Routes', () => {
         })
 
         expect(result.json()).toEqual({
-          ...mockCart,
+          ...adminCart,
           products: [
             {
               productId: product.id,
@@ -211,9 +219,9 @@ describe('Cart Routes', () => {
       it('should throw an error if the cart does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'POST',
-          url: `/carts/${ctx.idMock}/products`,
+          url: `/carts/${ctx.mocks.id}/products`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             productId: product.id,
@@ -226,19 +234,19 @@ describe('Cart Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Cart with ID: ${ctx.idMock} does not exist.`
+          message: `Cart with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
       it('should throw an error if the product does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'POST',
-          url: `/carts/${mockCart.id}/products`,
+          url: `/carts/${adminCart.id}/products`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
-            productId: ctx.idMock,
+            productId: ctx.mocks.id,
             quantity: 1
           }
         })
@@ -248,7 +256,7 @@ describe('Cart Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Product with ID: ${ctx.idMock} does not exist.`
+          message: `Product with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
@@ -257,7 +265,7 @@ describe('Cart Routes', () => {
           method: 'POST',
           url: `/carts/${customerCart.id}/products`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             productId: product.id,
@@ -300,9 +308,9 @@ describe('Cart Routes', () => {
       it('should throw an error if the cart does not exist', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/carts/${ctx.idMock}/products/${product.id}`,
+          url: `/carts/${ctx.mocks.id}/products/${product.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             quantity: 1
@@ -314,7 +322,7 @@ describe('Cart Routes', () => {
           title: 'Not Found',
           type: 'NotFoundError',
           level: 'minor',
-          message: `Cart with ID: ${ctx.idMock} does not exist.`
+          message: `Cart with ID: ${ctx.mocks.id} does not exist.`
         })
       })
 
@@ -323,7 +331,7 @@ describe('Cart Routes', () => {
           method: 'PATCH',
           url: `/carts/${customerCart.id}/products/${product.id}`,
           headers: {
-            authorization: `Bearer ${ctx.customerToken}`
+            authorization: `Bearer ${ctx.users.customer.token}`
           },
           payload: {
             quantity: 1
@@ -360,9 +368,9 @@ describe('Cart Routes', () => {
       it('should update a cart', async () => {
         const result = await ctx.app.inject({
           method: 'PATCH',
-          url: `/carts/${mockCart.id}/products/${product.id}`,
+          url: `/carts/${adminCart.id}/products/${product.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           },
           payload: {
             quantity: 10
@@ -370,7 +378,7 @@ describe('Cart Routes', () => {
         })
 
         expect(result.json()).toEqual({
-          ...mockCart,
+          ...adminCart,
           products: [
             {
               productId: product.id,
@@ -385,129 +393,17 @@ describe('Cart Routes', () => {
       it('should remove a product from a cart', async () => {
         const result = await ctx.app.inject({
           method: 'DELETE',
-          url: `/carts/${mockCart.id}/${product.id}`,
+          url: `/carts/${adminCart.id}/${product.id}`,
           headers: {
-            authorization: `Bearer ${ctx.adminToken}`
+            authorization: `Bearer ${ctx.users.admin.token}`
           }
         })
 
         expect(result.json()).toEqual({
-          ...mockCart,
+          ...adminCart,
           products: []
         })
       })
     })
   })
-
-  // This should be in /ME spec
-  // describe('/carts/:userId', () => {
-  //   describe('/GET', () => {
-  //     it('should return a cart', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'GET',
-  //         url: '/carts',
-  //         headers: {
-  //           authorization: `Bearer ${ctx.adminToken}`
-  //         },
-  //         payload: {
-  //           userId: ctx.admin.id
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual(mockCart)
-  //     })
-
-  //     it('should throw an error if the user does not exist', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'GET',
-  //         url: '/carts',
-  //         headers: {
-  //           authorization: `Bearer ${ctx.adminToken}`
-  //         },
-  //         payload: {
-  //           userId: ctx.idMock
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual({
-  //         code: 404,
-  //         title: 'Not Found',
-  //         type: 'NotFoundError',
-  //         level: 'minor',
-  //         message: `Cart with ID: ${ctx.idMock} does not exist.`
-  //       })
-  //     })
-
-  //     it('should throw an error if the user is not admin', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'GET',
-  //         url: '/carts',
-  //         headers: {
-  //           authorization: `Bearer ${ctx.customerToken}`
-  //         },
-  //         payload: {
-  //           userId: ctx.customer.id
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual({
-  //         code: 403,
-  //         title: 'Forbidden',
-  //         type: 'ForbiddenError',
-  //         level: 'minor',
-  //         message: 'You are not allowed to perform this action.'
-  //       })
-  //     })
-
-  //     it('should throw an error if the user is not authenticated', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'GET',
-  //         url: '/carts',
-  //         payload: {
-  //           userId: ctx.customer.id
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual({
-  //         code: 401,
-  //         title: 'Unauthorized',
-  //         type: 'UnauthorizedError',
-  //         level: 'minor',
-  //         message: 'Invalid or missing token.'
-  //       })
-  //     })
-  //   })
-
-  //   describe('/DELETE', () => {
-  //     it('should delete a cart', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'DELETE',
-  //         url: `/carts/${ctx.admin.id}`,
-  //         headers: {
-  //           authorization: `Bearer ${ctx.adminToken}`
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual(mockCart)
-  //     })
-
-  //     it('should throw an error if the user does not exist', async () => {
-  //       const result = await ctx.app.inject({
-  //         method: 'DELETE',
-  //         url: `/carts/${ctx.idMock}`,
-  //         headers: {
-  //           authorization: `Bearer ${ctx.adminToken}`
-  //         }
-  //       })
-
-  //       expect(result.json()).toEqual({
-  //         code: 500,
-  //         title: 'Internal Server Error',
-  //         type: 'InternalServerError',
-  //         level: 'fatal',
-  //         message: `Failed to delete cart for user with ID: ${ctx.idMock}.`
-  //       })
-  //     })
-  //   })
-  // })
 })

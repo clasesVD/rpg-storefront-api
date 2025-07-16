@@ -1,29 +1,31 @@
-import { JWTPayload } from '../src/api/schemas/auth.schema'
-import { buildApp } from '../src/app'
+import type { JWTPayload } from '../src/api/schemas/auth.schema'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 import { userTable } from '../src/db'
+import { eq } from 'drizzle-orm'
 
-const app = buildApp()
-
+let ctx: TestContext
 const payload = {
   name: 'John Doe',
-  email: 'john@example.com',
-  password: '123456',
-  role: 'A'
+  email: 'test@example.com',
+  password: 'password123',
+  role: 'C'
 }
 
+beforeAll(async () => {
+  ctx = await new TestContextBuilder().build()
+})
+
+afterAll(async () => {
+  await ctx.app.db
+    .delete(userTable)
+    .where(eq(userTable.email, payload.email))
+    .execute()
+})
+
 describe('Auth Routes', () => {
-  beforeAll(async () => {
-    await app.ready()
-    await (app as any).db.delete(userTable).execute()
-  })
-
-  afterAll(async () => {
-    await app.close()
-  })
-
   describe('/register', () => {
     it('should register a user correctly', async () => {
-      const result = await app.inject({
+      const result = await ctx.app.inject({
         method: 'POST',
         url: '/auth/register',
         payload
@@ -43,7 +45,7 @@ describe('Auth Routes', () => {
     })
 
     it('should not register a user with the same email', async () => {
-      const response = await app.inject({
+      const response = await ctx.app.inject({
         method: 'POST',
         url: '/auth/register',
         payload
@@ -61,14 +63,14 @@ describe('Auth Routes', () => {
     })
 
     it('should throw an error if the fields are invalid', async () => {
-      const result = await app.inject({
+      const result = await ctx.app.inject({
         method: 'POST',
         url: '/auth/register',
         payload: {
           name: 'bob',
           email: 'bobmail@example.com',
           password: 'bobpass',
-          role: 'C',
+          role: 'B'
         }
       })
 
@@ -84,7 +86,7 @@ describe('Auth Routes', () => {
 
   describe('/login', () => {
     it('should login a user correctly', async () => {
-      const response = await app.inject({
+      const response = await ctx.app.inject({
         method: 'POST',
         url: '/auth/login',
         payload
@@ -92,7 +94,7 @@ describe('Auth Routes', () => {
 
       const { token, user } = response.json()
 
-      const decoded: JWTPayload = (app as any).jwt.verify(token)
+      const decoded: JWTPayload = ctx.app.jwt.verify(token)
 
       expect({
         token: typeof token === 'string' && typeof decoded === 'object' && decoded.sub === user.id,
@@ -116,7 +118,7 @@ describe('Auth Routes', () => {
     })
 
     it('should throw an error if the email is incorrect', async () => {
-      const result = await app.inject({
+      const result = await ctx.app.inject({
         method: 'POST',
         url: '/auth/login',
         payload: { ...payload, email: 'invalidemail@example.com' }
@@ -132,7 +134,7 @@ describe('Auth Routes', () => {
     })
 
     it('should throw an error if the password is incorrect', async () => {
-      const result = await app.inject({
+      const result = await ctx.app.inject({
         method: 'POST',
         url: '/auth/login',
         payload: { ...payload, password: 'wrongpassword' }

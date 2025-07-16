@@ -1,28 +1,26 @@
-import { Rarity } from '../src/api/schemas/rarity.schema'
+import type { Rarity } from '../src/api/schemas/rarity.schema'
 import { rarityTable } from '../src/db'
-import { getAllFrom } from './utils/getSeeds'
-import { setupContext } from './utils/setupContext'
+import { type TestContext, TestContextBuilder } from './utils/TestContextBuilder'
 
-let ctx: Awaited<ReturnType<typeof setupContext>>
-let rarities: Rarity[]
+let ctx: TestContext
 
 describe('Rarities Routes', () => {
   beforeAll(async () => {
-    ctx = await setupContext()
-    rarities = await getAllFrom(ctx.app, rarityTable)
-  })
-
-  afterAll(async () => {
-    await ctx.close()
+    ctx = await new TestContextBuilder()
+      .withAdmin()
+      .withCustomer()
+      .build()
   })
 
   describe('/rarities/GET', () => {
     it('should return an array of rarities', async () => {
+      const rarities: Rarity[] = await ctx.db.getAllRecordsFrom(rarityTable)
+
       const result = await ctx.app.inject({
         method: 'GET',
         url: '/rarities',
         headers: {
-          authorization: `Bearer ${ctx.adminToken}`
+          authorization: `Bearer ${ctx.users.admin.token}`
         }
       })
 
@@ -34,7 +32,7 @@ describe('Rarities Routes', () => {
         method: 'GET',
         url: '/rarities',
         headers: {
-          authorization: `Bearer ${ctx.customerToken}`
+          authorization: `Bearer ${ctx.users.customer.token}`
         }
       })
 
@@ -44,6 +42,21 @@ describe('Rarities Routes', () => {
         type: 'ForbiddenError',
         level: 'minor',
         message: 'You are not allowed to perform this action.'
+      })
+    })
+
+    it('should thrown an error if the user is not authenticated', async () => {
+      const result = await ctx.app.inject({
+        method: 'GET',
+        url: '/rarities'
+      })
+
+      expect(result.json()).toEqual({
+        code: 401,
+        title: 'Unauthorized',
+        type: 'UnauthorizedError',
+        level: 'minor',
+        message: 'Invalid or missing token.'
       })
     })
   })
