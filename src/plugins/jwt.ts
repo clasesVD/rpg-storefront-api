@@ -14,10 +14,10 @@ export default fp((fastify, options, done) => {
     ...options
   })
 
-  fastify.decorate('hasPermission', function (roles: ROLE | ROLE[]) {
+  fastify.decorate('hasPermission', (roles: ROLE | ROLE[]) => {
     const allowedRoles: ROLE[] = Array.isArray(roles) ? roles : [roles]
 
-    return async function (req: FastifyRequest) {
+    return async (req: FastifyRequest) => {
       let payload: JWTPayload
       try {
         payload = await req.jwtVerify<JWTPayload>()
